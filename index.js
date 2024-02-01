@@ -23,7 +23,7 @@ const io = socketIo(server, {
 const serviceAccount = require('./database.json');
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://ai-chatbot-65272-default-rtdb.firebaseio.com"
+    databaseURL: "https://chatbot-9eb2b-default-rtdb.firebaseio.com"
 });
 
 const database = admin.database();
