@@ -1,6 +1,6 @@
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io');
+// MODULAR const socketIo = require('socket.io'); lib/socket.js
 const { OpenAI } = require("openai");
 const ChatBot = require("./chatbot/chatbot.js");
 const admin = require('firebase-admin');
@@ -8,16 +8,16 @@ const admin = require('firebase-admin');
 // Initialize the express application
 const app = express();
 
-// Create an HTTP server
+// Create a local HTTP server
 const server = http.createServer(app);
 
-// Initialize socket.io
-const io = socketIo(server, {
+// MODULAR Initialize socket.io
+/* const io = socketIo(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"],
     }
-});
+}); */
 
 // Initialize Firebase Admin SDK 
 const serviceAccount = require('./database.json');
