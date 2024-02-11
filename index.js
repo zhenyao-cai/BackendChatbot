@@ -3,7 +3,7 @@ const http = require('http');
 // MODULAR const socketIo = require('socket.io'); lib/socket.js
 const { OpenAI } = require("openai");
 const ChatBot = require("./chatbot/chatbot.js");
-const admin = require('firebase-admin');
+const admin = require('firebase-admin');  
 
 // Initialize the express application
 const app = express();
@@ -69,7 +69,7 @@ io.on('connection', (socket) => {
 
         lobbies[guid] = { users: {}, roomStarted: false, botInitialized: false, hostUserame: username, chatbot: null, chatData: null, conclusionStarted: false, inactivity: false };
 
-        lobbies[guid].users[username] = 0;
+        lobbies[guid].users[username] = 0; // user initialized to 0
         socket.emit('lobbyCreated', guid);
     });
 
@@ -85,7 +85,7 @@ io.on('connection', (socket) => {
         // console.log(lobbies);
         if (lobbies[guid] && !lobbies[guid].users[username]) {
             socket.join(guid);
-            lobbies[guid].users[username] = 0;
+            lobbies[guid].users[username] = 0; // username initialized to 0
             socket.emit('joinedLobby', guid);
 
             io.to(guid).emit('userJoinedLobby', username);
