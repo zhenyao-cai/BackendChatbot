@@ -57,7 +57,7 @@ function generateGUID() {
 io.on('connection', (socket) => {
     // Lobby creation
     socket.on('createLobby', async (username) => {
-        const guid = generateGUID();
+        const guid = generateGUID(); // generate in createlobby
         
         console.log("Guid: ", guid);
         console.log(io.sockets.adapter.rooms);
