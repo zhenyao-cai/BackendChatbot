@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
-// MODULAR const socketIo = require('socket.io'); lib/socket.js
+const initializeSocketIo = require('lib/socket');
+
 const { OpenAI } = require("openai");
 const ChatBot = require("./chatbot/chatbot.js");
 const admin = require('firebase-admin');  
@@ -47,11 +48,15 @@ function formatTimestamp(timestamp) {
 // Lobby management
 const lobbies = {};
 
-// Function to generate a unique 4-character GUID
-// We can modify this to be whatever we want.
-function generateGUID() {
-    return Math.random().toString(36).substring(2, 6).toUpperCase();
-}
+// // Function to generate a unique 4-character GUID
+// // We can modify this to be whatever we want.
+// function generateGUID() {
+//     return Math.random().toString(36).substring(2, 6).toUpperCase();
+// }
+
+
+//Remove Socket.io logic and replace with this
+//initializeSocketIo(server);
 
 // Socket.io logic
 io.on('connection', (socket) => {
