@@ -11,10 +11,15 @@ const server = http.createServer(app);
 
 // Initialize Firebase Admin SDK 
 const serviceAccount = require('./database.json');
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://ai-chatbot-65272-default-rtdb.firebaseio.com"
-});
+try {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: "https://chatbot-9eb2b-default-rtdb.firebaseio.com"
+    });
+    console.log('Firebase initialized successfully');
+} catch (error) {
+    console.error('Error initializing Firebase:', error); //test firebase connection
+}
 
 // DATABASE NOT USED YET
 const database = admin.database();
