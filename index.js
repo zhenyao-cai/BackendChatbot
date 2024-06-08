@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const initializeSocketIo = require('./lib/socket');
-const admin = require('firebase-admin');  
+const admin = require('firebase-admin');
 
 // Initialize the express application
 const app = express();
@@ -9,12 +9,17 @@ const app = express();
 // Create a local HTTP server
 const server = http.createServer(app);
 
-// Initialize Firebase Admin SDK 
+// Initialize Firebase Admin SDK
 const serviceAccount = require('./database.json');
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://chatbot-9eb2b-default-rtdb.firebaseio.com"
-});
+try {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: "https://chatbot-9eb2b-default-rtdb.firebaseio.com"
+    });
+    console.log('Firebase initialized successfully');
+} catch (error) {
+    console.error('Error initializing Firebase:', error); //test firebase connection
+}
 
 // DATABASE NOT USED YET
 const database = admin.database();
