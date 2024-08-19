@@ -6,7 +6,7 @@
  */
 
 const readline = require('readline');
-const ChatBot = require('../ChatBot');
+const ChatBot = require('../../src/models/ChatBot');
 
 async function testChatBotClass() {
     const chatBot = new ChatBot(["Student"], "Is AI ethical?");

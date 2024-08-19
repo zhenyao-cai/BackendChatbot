@@ -1,5 +1,5 @@
 const Lobby = require('../Lobby'); // Import lobby class
-const User = require('../../User/User');
+const User = require('../../src/models/user');
 
 function testLobbyClass() {
     /* GENERAL CASE */

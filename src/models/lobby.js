@@ -1,23 +1,23 @@
-const { generateGUID } = require("../utils/utils");
-const Chatroom = require('../Chatroom/Chatroom');
-const User = require('../User/User');
+const Host = require('../models/host');
+const Chatroom = require('./chatroom');
+// const User = require('./user');
+const { generateGUID } = require("../../utils/utils");
 
 class Lobby {
     /**
-     * Constructs a new instance of the Lobby class.
-     * This class manages the operations of a chatroom lobby, including user management.
-     * 
-     * @param {String} hostUsername - The username of the lobby's host.
+     * Manages lobby properties, chatroom objects, 
+     * user objects, and host object.
+     * @param {Host} hostObject - The lobby's host object.
      */
-    constructor(hostUsername) {
-        this.hostUsername = hostUsername;
-        this.users = {}; // Initialize users object
-        this.chatrooms = {}; // One "classroom lobby" contains multiple chatrooms, keyed by genarated GUIDs
+    constructor(hostObject) {
+        this.host = hostObject;
+        this.users = {}; // Stores Users obejcts in lobby, keyed by socket.id
+        this.chats = {}; // Stores chatrooms in lobby, keyed by GUID
+        
         this.chatroomGuids = []; // Easy access to chatroom guids
 
-        // 3/19: not adding host as user to classrooms
-        // this.users[hostUsername] = new User(hostUsername); // Add host as first user, key=hostUsername
 
+        // fix for host to select MAX chat size
         this.minChatroomSize = 4; // SET TO 4 users per chatroom
 
         // Store default values for individual chatrooms
@@ -25,7 +25,7 @@ class Lobby {
         this.lobbySettings = null; // stores chat settings: botName, chatlength, assertiveness, topic, chatName
         this.conclusionStarted = false; 
 
-        // not needed
+        // not needed, botS initialized?
         this.botInitialized = false; // not needed  for main lobby
         this.chatbot = null;  // NOT NEEDED for main lobby
         this.inactivity = false; // NOT NEEDED for main lobby
@@ -82,9 +82,9 @@ class Lobby {
         return totalChatrooms;
     }
 
-    addUser(newUser) {
-        if (!this.users[newUser.username]) {
-            this.users[newUser.username] = newUser;
+    addUser(userObject) {
+        if (!this.users[userObject.username]) {
+            this.users[userObject.username] = userObject;
             return true;
         }
         return false;
@@ -112,14 +112,7 @@ class Lobby {
     }
 
     getAllUsernames() {
-        if (this.users){
-            return Object.keys(this.users); // This will return an array of usernames
-        }
-        else {
-            console.log("No users in lobby.");
-            return null;
-        }
-        
+        return Object.keys(this.users);
     }
 
     getChatroom(guid) {
@@ -130,6 +123,14 @@ class Lobby {
             console.log("Get Chatroom: Chatroom not found.");
             return null;
         }
+    }
+
+    getHostId() {
+        return this.host.getSocketId();
+    }
+
+    getHostUsername() {
+        return this.host.getHostUsername();
     }
 }
 

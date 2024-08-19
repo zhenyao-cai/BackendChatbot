@@ -1,6 +1,6 @@
 const { OpenAI } = require("openai");
 require('dotenv').config();
-const {readFileContent } = require('../utils/utils');
+const {readFileContent } = require('../../utils/utils');
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -65,6 +65,7 @@ class ChatBot {
             console.log("Question generated.");
 
             this.initialQuestion = completion.choices[0].message.content;
+            console.log(` > Prompt: ${this.initialQuestion}`); // check prompt
 
             this.behaviorMessages.push({role: "assistant", content: completion.choices[0].message.content});
             return true;
