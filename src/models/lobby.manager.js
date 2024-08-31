@@ -1,6 +1,6 @@
-const Lobby = require('../models/lobby');
-const Host = require('../models/host');
-const User = require('../models/user');
+const Lobby = require('./lobby');
+const Host = require('./host');
+const User = require('./user');
 const { generateGUID } = require('../../utils/utils');
 
 class LobbyManager {
@@ -13,6 +13,7 @@ class LobbyManager {
         // Map structures used for efficient room assignment and disconnect
         this.lobbies = {}; // Stores all Lobby objects, keyed by GUID
         this.userMasterList = {}; // Store all User Objects, keyed by socket.id
+        this.MAX_USERS = 300;  
     } 
 
     // Create a new host and assign them to a new lobby
@@ -24,11 +25,16 @@ class LobbyManager {
         return guid;
     }
 
-    // Joins a new user to a lobby given the lobby code
+    // Adds a new user object to a lobby using the lobby code
     joinLobby(guid, socketId, username) {
         // Format return parameters with messages for easy lobby.handler emit
         const foundLobby = this.lobbies[guid];        
         if (foundLobby) {
+            // First check if lobby has reached capacity
+            if (foundLobby.getUserCount() >= this.MAX_USERS) {
+                return { success: false, message: `Lobby ${guid} is full` };
+            }
+
             const newUser = new User(socketId, username);
             const isAdded = lobby.addUser(newUser);
 
@@ -47,7 +53,7 @@ class LobbyManager {
         }
     }   
 
-    // Store user objects by socket.id for easy disconnect handling
+    // HELPER: Store user objects by socket.id for easy disconnect handling
     addUserMasterList(userObject) {
         // Different from lobby.js, master list organizes users by socket.id
         if (!this.userMasterList[userObject.socketId]) {

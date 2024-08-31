@@ -1,5 +1,6 @@
 module.exports = function registerLobbyHandlers(socket, io, db, lobbyManager) {
 
+    // Assign a new host object to a lobby object, join host socket to GUID
     socket.on('createLobby', async (hostUsername) => {
         const guid = lobbyManager.createLobby(socket.id, hostUsername);
         console.log('Lobby created with GUID:', guid);
@@ -8,15 +9,15 @@ module.exports = function registerLobbyHandlers(socket, io, db, lobbyManager) {
 
         const foundLobby = lobbyManager.getLobby(guid);
 
-        // Dynamic firebase access, use only in handler.js files
+        // Dynamic firebase access, set up new lobbby entry
         const lobbyRef = db.database().ref('lobbies').child(guid);
         lobbyRef.set({
             timestamp: Date.now(),
-            code: guid,
             host: foundLobby.getHostUsername(),
         });
     });
 
+    // Create new user object, join user socket to existing GUID
     socket.on('joinLobby', async (guid, username) => {
         console.log(`> Request to join: ${guid} by user: ${username}`);
         console.log('Existing lobbies: ' + lobbyManager.getAllLobbyGUIDs());
@@ -36,6 +37,7 @@ module.exports = function registerLobbyHandlers(socket, io, db, lobbyManager) {
         }
     });
 
+    // Return list of all usernames from an existing lobbby
     socket.on('getUserListOfLobby', async (guid) => {
         const foundLobby = lobbyManager.getLobby(guid);
     
@@ -58,6 +60,7 @@ module.exports = function registerLobbyHandlers(socket, io, db, lobbyManager) {
         }
     });
 
+    // Not implemented on front-end
     socket.on('leaveLobby', async (guid) => {
         const foundLobby = lobbyManager.getLobby(guid);
         // disconnect processes

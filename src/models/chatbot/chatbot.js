@@ -1,22 +1,22 @@
+// For test files
+// require('dotenv').config();
+
 const { OpenAI } = require("openai");
-require('dotenv').config();
-const {readFileContent } = require('../../utils/utils');
+const {readFileContent } = require('../../../utils/file.utils');
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
 
-class ChatBot {
+class Chatbot {
     /**
      * Constructs a new instance of the ChatBot class.
-     * This class facilitates interactive discussions within a group chat, leveraging the OpenAI API to generate 
-     * conversation prompts and responses. It manages user participation, initiates discussion topics, 
-     * and ensures dynamic interaction throughout the chat session.
-     * 
-     * @param {Array} users - A list of user identifiers participating in the chat.
-     * @param {String} topic - The central topic or theme of the chat discussion.
+     * Uses OpenAI API to generate prompts and responses,
+     * manages user participation.
+     * @param {Array} users - A list of users participating in the chat.
+     * @param {String} topic - The topic of the chat discussion.
      * @param {String} [botname='ChatZot'] - The name of the bot.
-     * @param {Number} [assertiveness=2] - The bot's assertiveness level, affecting its participation ratio.
+     * @param {Number} [assertiveness=2] - The bot's assertiveness level, affects participation ratio.
      */
     constructor(users, topic, botname="ChatZot", assertiveness=2) {
         this.users = users;
@@ -51,6 +51,14 @@ class ChatBot {
         this.chimeMessages = [{role: "system", content: this.chimePrompt}];
 
         // CALL INITIALIZE PROMPTING AFTER CONSTRUCTOR
+    }
+
+    getBotName() {
+        return this.botname;
+    }
+
+    getInitialQuestion() {
+        return this.initialQuestion;
     }
 
     async initializePrompting() {
@@ -217,11 +225,6 @@ class ChatBot {
         // 2: conclusion
         // 3: inactivity
     }
-
-    getInitialQuestion() {
-        return this.initialQuestion;
-    }
 }
 
-
-module.exports = ChatBot;
+module.exports = Chatbot;

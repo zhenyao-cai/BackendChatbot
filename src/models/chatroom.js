@@ -1,3 +1,6 @@
+// REMOVE CLASS 
+// Within lobby class, use MAP sturcture to track users in chatroom
+
 class Chatroom {
     /**
      * Constructs a new instance of the Chatroom class.
@@ -9,12 +12,11 @@ class Chatroom {
     constructor() {
         this.usernameList = []; // Store the username identifiers for all User objects aded to the room
 
-        this.roomStarted = false;
-        this.botInitialized = false;
+        //this.roomStarted = false;
+        //this.botInitialized = false;
         this.chatbot = null;
-        this.chatSettings = null;
-        this.conclusionStarted = false;
-        this.inactivity = false;
+        //this.chatSettings = null;
+        //this.conclusionStarted = false;
     }
 
     addUser(username) {

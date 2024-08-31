@@ -1,7 +1,6 @@
-const Host = require('../models/host');
-const Chatroom = require('./chatroom');
-// const User = require('./user');
-const { generateGUID } = require("../../utils/utils");
+const Chatbot = require('./chatbot/chatbot');
+const { generateGUID } = require("../../utils/guid.utils");
+const { shuffle } = require("../../utils/shuffle.utils");
 
 class Lobby {
     /**
@@ -11,75 +10,57 @@ class Lobby {
      */
     constructor(hostObject) {
         this.host = hostObject;
-        this.users = {}; // Stores Users obejcts in lobby, keyed by socket.id
-        this.chats = {}; // Stores chatrooms in lobby, keyed by GUID
         
-        this.chatroomGuids = []; // Easy access to chatroom guids
+        // Stores Users objects in lobby, keyed by socket.id
+        this.users = {}; 
+        
+        // Stores list of usernames in each chatroom, keyed by chatroom guid
+        this.chatrooms = {}; 
 
+        // Stores all chatbot objects, keyed by chatroom guid
+        this.chatbots = {};
+
+        // Stores chat settings: botName, chatLength, assertiveness, topic, chatName
+        this.chatSettings = null;
 
         // fix for host to select MAX chat size
         this.minChatroomSize = 4; // SET TO 4 users per chatroom
 
-        // Store default values for individual chatrooms
-        this.roomStarted = false;  // can be use to track if all Chatrooms in classroom started
-        this.lobbySettings = null; // stores chat settings: botName, chatlength, assertiveness, topic, chatName
-        this.conclusionStarted = false; 
+        // Initialize time properties, according to indiviual chatrooms
+        this.time = 0;
+        this.timerInterval = 0;
 
         // not needed, botS initialized?
-        this.botInitialized = false; // not needed  for main lobby
         this.chatbot = null;  // NOT NEEDED for main lobby
         this.inactivity = false; // NOT NEEDED for main lobby
-
-
-        // // TEST using individual variables
-        // this.botNameSetting = null;
-        // this.chatLengthSetting = null;
-        // this.assertivenessSetting = null;
-        // this.topicSetting = null;
-        // this.chatNameSetting = null
     }
 
-    createChatrooms(){
-        // count number of users
-        const usernames = Object.keys(this.users); // Get all the users in the lobby
-        const totalUsers = usernames.length;
+    // CONTINUE IMPLEMENTING TIMER FUNCTION
+    setTime(minutes) {
+        this.time = minutes * 60; // Convert minutes to seconds
+    }
 
-        if (totalUsers === 0) {
-            console.log("No users in lobby.");
-            return 0; // or return an appropriate message indicating no users are in the lobbyb
+    startTimer(io, guid) {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
         }
 
-        // divide into correct number of chatrooms
-        let totalChatrooms = 0;
-        
-        if (totalUsers < this.minChatroomSize){
-            totalChatrooms = 1;
+        this.timerInterval = setInterval(() => {
+            if (this.time > 0) {
+                this.time -= 1;
+                io.to(guid).emit('timerUpdate', this.time);
+            } else {
+                clearInterval(this.timerInterval);
+                io.to(guid).emit('timerEnded');
+            }
+        }, 1000);
+    }
+
+    stopTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
         }
-        else {
-            totalChatrooms = Math.floor(totalUsers/this.minChatroomSize);
-        }
-
-        // initialize chatrooms with GUIDS
-        for (let i = 0; i < totalChatrooms; i++) {
-            const guid = generateGUID();
-            this.chatrooms[guid] = new Chatroom();
-            this.chatroomGuids.push(guid); // Storing in Lobby object for easy access
-        }
-
-        usernames.forEach((username, index) => {
-            const roomIndex = index % totalChatrooms; // Determine the room index in a round-robin fashion
-            const currentRoomGUID = this.chatroomGuids[roomIndex]; // Use the easy array from the previous block
-
-            // Record chatroom code in User object
-            let userObject = this.users[username]; // Fetch the user object by username
-            userObject.assignedGUID = currentRoomGUID // Store the assigned chatroom code in the User Object, to be used in socket.join
-
-            // Record user in Chatroom object
-            this.chatrooms[currentRoomGUID].addUser(username); // Add the username to the chatroom username list
-        });
-
-        console.log('Chatrooms created.');
-        return totalChatrooms;
     }
 
     addUser(userObject) {
@@ -97,15 +78,13 @@ class Lobby {
             // Additional logic for when a user leaves a lobby
             return true;
         }
-
         return false;
     }
 
     getUser(username) {
         if (this.users[username]){
             return this.users[username];
-        }
-        else {
+        } else {
             console.log("User not found.");
             return "";
         }
@@ -115,14 +94,8 @@ class Lobby {
         return Object.keys(this.users);
     }
 
-    getChatroom(guid) {
-        if (this.chatrooms[guid]){
-            return this.chatrooms[guid];
-        }
-        else {
-            console.log("Get Chatroom: Chatroom not found.");
-            return null;
-        }
+    getUserCount() {
+        return Object.keys(this.users).length;
     }
 
     getHostId() {
@@ -131,6 +104,127 @@ class Lobby {
 
     getHostUsername() {
         return this.host.getHostUsername();
+    }
+
+    getChatbot(guid) {
+        if (this.chatbots[guid]){
+            return this.chatbots[guid];
+        } else {
+            console.log("Get chatbot: Chatbot not found.");
+            return null;
+        }
+    }
+
+    getChatSettings() {
+        return this.chatSettings;
+    }
+
+    getChatroomMap(){
+        return this.chatrooms;
+    }
+
+    // Create the correct number of chatrooms, join users to the room
+    createChatrooms(io) {
+        // Count number of users in lobby
+        const totalUsers = this.getUserCount();
+        if (totalUsers === 0) {
+            console.log("No users in lobby.");
+            return 0;
+        }
+
+        // Divide into correct number of chatrooms
+        let totalChatrooms = 0;
+        if (totalUsers < this.minChatroomSize){
+            totalChatrooms = 1;
+        } else {
+            totalChatrooms = Math.floor(totalUsers/this.minChatroomSize);
+        }
+
+        // Initialize chatrooms with GUIDS
+        let chatroomGuids = []; // Easy access to chatroom guids
+        for (let i = 0; i < totalChatrooms; i++) {
+            const guid = generateGUID();
+            this.chatrooms[guid] = [];
+            chatroomGuids.push(guid);
+        }
+
+        // Randomly assign users per chat
+        let userSockets = Object.keys(this.users);
+        shuffle(userSockets);
+        userSockets.forEach((userSocket, index) => {
+            // Determine the room index in a round-robin fashion
+            const roomIndex = index % totalChatrooms;
+            const currentRoomGUID = chatroomGuids[roomIndex];
+
+            // Record username in chatroom map
+            const user = this.users[userSocket];
+            const username = user.getUsername();
+            this.chatrooms[currentRoomGUID].push(username);
+
+            // Join user socket to guid server room
+            const socketObject = io.sockets.sockets.get(userSocket);
+            if (socketObject) {
+                socketObject.join(currentRoomGUID);
+                socketObject.emit('joinedChatroom', currentRoomGUID);
+                io.to(currentRoomGUID).emit('userJoinedChatroom', username);
+                console.log(`${username} has joined room ${currentRoomGUID}`);
+            } else {
+                console.error('Socket not found or is not connected.');
+            }
+        });
+
+        console.log('Chatrooms created.');
+        return totalChatrooms;
+    }
+
+    // Initialize a chatbot object for each chatroom within the lobby
+    async initializeBots(guid, io, db) {
+
+
+        for (const chat_guid in this.chatrooms) {
+
+            console.log('CREATING CHATBOT for' + chat_guid);
+            console.log('Users:');
+            for (username in this.chatrooms[chat_guid]){
+                console.log(username + '\n');
+            }
+
+            const chatbotInstance = new Chatbot(
+                this.chatrooms[chat_guid], this.chatSettings.topic,
+                this.chatSettings.botName, this.chatSettings.assertiveness
+            );
+
+            // Create the initial prompt to begin the chat
+            const isSuccess = chatbotInstance.initializePrompting();
+            if (isSuccess) {
+                const botPrompt =
+                    await chatbotInstance.getInitialQuestion();
+                console.log(` > InitialPrompt: ${botPrompt}`);
+
+                // Send to frontend to display prompt in the chatroom
+                io.to(chat_guid).emit('message', {
+                    text: botPrompt,
+                    sender: chatbotInstance.getBotName(),
+                    timestamp: formatTimestamp(new Date().getTime())
+                });
+
+                // Dynamic firebase access, set up new chatroom entry
+                const chatroomRef = db.ref(
+                    `lobbies/${guid}/chatrooms/${chat_guid}/messages`
+                );
+                const newMessageRef = chatroomRef.push();
+                newMessageRef.set({
+                    timestamp: formatTimestamp(new Date().getTime()),
+                    sender: chatbotInstance.getBotName(),
+                    text: botPrompt
+                });
+
+                // Map chatbot object to chatroom code
+                this.chatbots[chat_guid] = chatbotInstance;
+            } else {
+                console.log("Error: Prompt failed to initialize.");
+            }
+        }
     }
 }
 
