@@ -26,8 +26,7 @@ class Lobby {
         // fix for host to select MAX chat size
         this.minChatroomSize = 4; // SET TO 4 users per chatroom
 
-        // Initialize time properties, according to indiviual chatrooms
-        this.time = 0;
+        // Initialize time property
         this.timerInterval = 0;
 
         // not needed, botS initialized?
@@ -35,20 +34,19 @@ class Lobby {
         this.inactivity = false; // NOT NEEDED for main lobby
     }
 
-    // CONTINUE IMPLEMENTING TIMER FUNCTION
-    setTime(minutes) {
-        this.time = minutes * 60; // Convert minutes to seconds
-    }
-
+    // Timer functions help track the progress of all active chats within a lobby
     startTimer(io, guid) {
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
         }
 
+        // Convert minutes to seconds
+        let time = this.chatSettings.chatLength * 60;
+
         this.timerInterval = setInterval(() => {
-            if (this.time > 0) {
-                this.time -= 1;
-                io.to(guid).emit('timerUpdate', this.time);
+            if (time > 0) {
+                time -= 1;
+                io.to(guid).emit('timerUpdate', time);
             } else {
                 clearInterval(this.timerInterval);
                 io.to(guid).emit('timerEnded');
@@ -56,6 +54,7 @@ class Lobby {
         }, 1000);
     }
 
+    // UNUSED FUNCTION, close chat logic not implemented
     stopTimer() {
         if (this.timerInterval) {
             clearInterval(this.timerInterval);

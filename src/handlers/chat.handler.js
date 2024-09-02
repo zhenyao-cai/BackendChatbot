@@ -36,6 +36,9 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
         // Initialize one bot per chatrooms
         console.log("createChatrooms success, initializing bots...");
         foundLobby.initializeBots(guid, io, db);
+
+        // Begin timer
+        foundLobby.startTimer(io, guid);
     });
 
     // Send messages within a chatroom, use .to(chat_guid) to direct messages
@@ -101,7 +104,7 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
 
     });
 
-    // Triggers chatbot to send a new message to an inactive lobby
+    // Prompts chatbot to chime in to an inactive lobby
     socket.on('lobbyInactivity', async (guid, chat_guid) => {
         console.log("lobbyInactivity");
         const foundLobby = lobbyManager.getLobby(guid);
@@ -131,30 +134,33 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
         }
     });
 
-    // starts chat conclusion, prompts chatbot
-    socket.on('chatStartConclusionPhase', async (class_guid, chat_guid, timeLeft) => {
+    // Begin chat conclusion phase, prompt chatbot for conclusion prompt
+    socket.on('chatStartConclusionPhase', async (guid, chat_guid, timeLeft) => {
         console.log("chatStartConclusionPhase ON PAUSE");
-        // const foundLobby = lobbyManager.getLobby(class_guid);
+        const foundLobby = lobbyManager.getLobby(guid);
 
-        // if (foundLobby){ 
-        //     const foundChatroom = foundLobby.getChatroom(chat_guid);
+        if (foundLobby){ 
+            const foundChatbot = foundLobby.getChatbot(chat_guid);
 
-        //     if (foundChatroom && foundChatroom.botInitialized 
-        //     && foundChatroom.conclusionStarted) {
+            if (foundChatbot) {
+                const conclusionMessage = await foundChatbot.startConclusion(timeLeft);
 
-        //         foundChatroom.conclusionStarted = true;
-        //         let chatbotInstance = foundChatroom.chatbot;
-        //         let conclusionMessage = await chatbotInstance.startConclusion(timeLeft);
+                io.to(chat_guid).emit('message', { 
+                    text: conclusionMessage, 
+                    sender: foundChatbot.getBotName(),
+                    timestamp: formatTimestamp(new Date().getTime()) 
+                });
 
-        //         io.to(chat_guid).emit('message', { text: conclusionMessage, sender: chatbotInstance.botname });
-
-        //         let chatroomRef = database.ref(`chatrooms/${chat_guid}/users/BOT/messages`);
-        //         let newMessageRef = chatroomRef.push();
-        //         newMessageRef.set({
-        //             text: conclusionMessage,
-        //             timestamp: formatTimestamp(new Date().getTime()),
-        //         });
-        //     }
-        // }
+                const chatroomRef = database.ref(
+                    `lobbies/${guid}/chatrooms/${chat_guid}/messages`
+                );
+                let newMessageRef = chatroomRef.push();
+                newMessageRef.set({
+                    timestamp: formatTimestamp(new Date().getTime()),
+                    sender: foundChatbot.getBotName(),
+                    text: conclusionMessage
+                });
+            }
+        }
     });
 };
