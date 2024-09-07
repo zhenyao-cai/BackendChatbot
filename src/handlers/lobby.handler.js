@@ -10,7 +10,7 @@ module.exports = function registerLobbyHandlers(socket, io, db, lobbyManager) {
         const foundLobby = lobbyManager.getLobby(guid);
 
         // Dynamic firebase access, set up new lobbby entry
-        const lobbyRef = db.database().ref('lobbies').child(guid);
+        const lobbyRef = db.ref('lobbies').child(guid);
         lobbyRef.set({
             timestamp: Date.now(),
             host: foundLobby.getHostUsername(),

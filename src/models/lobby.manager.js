@@ -36,7 +36,11 @@ class LobbyManager {
             }
 
             const newUser = new User(socketId, username);
-            const isAdded = lobby.addUser(newUser);
+            const isAdded = foundLobby.addUser(newUser);
+            console.log(
+                'User ' + username + ', ' + socketId +
+                ' added to lobby ' + guid
+            )
 
             if (isAdded ) {
                 this.addUserMasterList(newUser);

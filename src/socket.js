@@ -43,17 +43,17 @@ module.exports = function initializeSocketIO(server, db) {
         socket.on('disconnect', (reason) => {
             console.log(`User ${socket.id} disconnected because of ${reason}`);
              
-            if (socket.id in lobbyManager.getAllUserIdsMasterList()) {
-                const foundUser = lobbyManager.getUserFromMasterList(socket.id);
-                // remove from master list
-                // remove from chatroom and lobby
-                // or if in chat, mark as inactive
-            }
-            else if (socket.id in lobbyManager.getAllHostIds()) {
-                const foundLobby = lobbyManager.getLobbyByHostSocketId(socket.id);
-                // send all lobby participants to home page? maybe display message
-                // remove all host, user, lobby, chatroom, and chatbot data
-            }
+            // if (socket.id in lobbyManager.getAllUserIdsMasterList()) {
+            //     const foundUser = lobbyManager.getUserFromMasterList(socket.id);
+            //     // remove from master list
+            //     // remove from chatroom and lobby
+            //     // or if in chat, mark as inactive
+            // }
+            // else if (socket.id in lobbyManager.getAllHostIds()) {
+            //     const foundLobby = lobbyManager.getLobbyByHostSocketId(socket.id);
+            //     // send all lobby participants to home page? maybe display message
+            //     // remove all host, user, lobby, chatroom, and chatbot data
+            // }
         });
     });
 

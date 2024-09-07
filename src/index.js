@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { checkEnvironmentVariables } = require('../config/env.config');
 const { initializeFirebase } = require('../config/firebase.config');
-const initializeSocketIo = require('./lib/socket');
+const initializeSocketIo = require('./socket');
 const { port } = require('../config/server.config');
 
 // Load and check environment variables

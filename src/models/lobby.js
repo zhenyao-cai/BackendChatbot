@@ -1,6 +1,7 @@
 const Chatbot = require('./chatbot/chatbot');
 const { generateGUID } = require("../../utils/guid.utils");
 const { shuffle } = require("../../utils/shuffle.utils");
+const { formatTimestamp } = require("../../utils/date.utils");
 
 class Lobby {
     /**
@@ -178,20 +179,25 @@ class Lobby {
 
     // Initialize a chatbot object for each chatroom within the lobby
     async initializeBots(guid, io, db) {
+        if (!this.chatSettings) {
+            console.log('Chat settings not initialized.');
+            return;
+        }
 
-
-        for (const chat_guid in this.chatrooms) {
-
-            console.log('CREATING CHATBOT for' + chat_guid);
+        for (let chat_guid in this.chatrooms) {
+            console.log('Creating chatbot for room: ' + chat_guid);
             console.log('Users:');
-            for (username in this.chatrooms[chat_guid]){
-                console.log(username + '\n');
+            for (let usernames of this.chatrooms[chat_guid]){
+                console.log(usernames);
             }
 
             const chatbotInstance = new Chatbot(
                 this.chatrooms[chat_guid], this.chatSettings.topic,
                 this.chatSettings.botName, this.chatSettings.assertiveness
             );
+
+            // Signal for users to jump to chatroom page
+            io.to(chat_guid).emit('chatStarted', chat_guid);
 
             // Create the initial prompt to begin the chat
             const isSuccess = chatbotInstance.initializePrompting();

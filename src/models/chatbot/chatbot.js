@@ -37,9 +37,15 @@ class Chatbot {
         this.countPerUser = [];
         this.messageCount = 0;
 
-        this.behaviorPrompt = readFileContent("lib/ChatBot/Prompts/behavior_prompt.txt");
-        this.chimePrompt = readFileContent("lib/ChatBot/Prompts/chime_prompt.txt");
-        this.participationPrompt = readFileContent("lib/ChatBot/Prompts/participation_prompt.txt");
+        this.behaviorPrompt = readFileContent(
+            'src/models/chatbot/prompts/behavior_prompt.txt'
+        );
+        this.chimePrompt = readFileContent(
+            'src/models/chatbot/prompts/chime_prompt.txt'
+        );
+        this.participationPrompt = readFileContent(
+            'src/models/chatbot/prompts/participation_prompt.txt'
+        );
         
         this.conclusionPrompt = "There is only {{time}} minute left in this discussion. Please prompt the users to WRAP UP THEIR DISCUSSION by supplying their final remarks.";
 
