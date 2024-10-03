@@ -23,18 +23,15 @@ class Chatbot {
         console.log("Users in chat:", this.users);
         this.topic = topic;
         this.initialQuestion = '';
+
         this.botname = botname;
         this.assertiveness = assertiveness;
 
         // assertiveness is 2 in parameter
-        if (this.assertiveness == 1) {
-            this.participationRatio = 0.05;
-        } else if (this.assertiveness == 2) {
-            this.participationRatio = 0.15;
-        } else {this.participationRatio = 0.25;}
+        this.participationRatio = this.assertiveness === 1 ? 0.05 : (this.assertiveness === 2 ? 0.15 : 0.25);
 
-        this.messageRatios = [];
-        this.countPerUser = [];
+        this.messageRatios = Array(users.length).fill(0);
+        this.countPerUser = Array(users.length).fill(0);
         this.messageCount = 0;
 
         this.behaviorPrompt = readFileContent(
@@ -70,7 +67,7 @@ class Chatbot {
     async initializePrompting() {
         try {
             console.log("Starting question generation...");
-            
+
             let completion = await openai.chat.completions.create({
                 messages: this.behaviorMessages,
                 model: "gpt-3.5-turbo-1106",
@@ -90,10 +87,10 @@ class Chatbot {
     async botMessageListener(user, message, timestamp) {
         // Recieves messages as input and decides whether to respond
         let lowParticipationUser = this.participationTracker(user);
-
+        console.log("lowParticipationUser")
         this.chimeMessages.push({role: "user", name: user, content: message});
         this.behaviorMessages.push({role: "user", name: user, content: message});
-        
+
         try {
             let completion  = await openai.chat.completions.create({
                 messages: this.chimeMessages,
@@ -104,9 +101,10 @@ class Chatbot {
 
             if (completion.choices[0].message.content == "...") {
                 this.chimeMessages.push({role: "assistant", content: "..."});
-                
+
                 if (lowParticipationUser) {
                     let response = await this.sendMessage(1, user=user);
+                    console.log("participation triggered.")
                     return response;
                 }
 
@@ -124,17 +122,21 @@ class Chatbot {
     participationTracker(userName) {
         // refreshes ratios and checks if someone isnt participating enough
         const index = this.users.indexOf(userName);
+        console.log("index is"+index);
         this.messageCount++;
 
         this.countPerUser[index] += 1;
-    
+
+        console.log(userName + this.countPerUser[index])
+
         // Update ratios
         for (let i = 0; i < this.users.length; i++) {
           this.messageRatios[i] = this.countPerUser[i] / this.messageCount;
         }
-    
+
         // Check for ratios less than 0.05
         for (let i = 0; i < this.users.length; i++) {
+            console.log(this.messageRatios[i])
           if (this.messageRatios[i] < this.participationRatio) {
             return this.users[i];
           }
@@ -223,7 +225,7 @@ class Chatbot {
 
         }
 
-        // 0: chime 
+        // 0: chime
         // 1: participation
         // 2: conclusion
         // 3: inactivity
