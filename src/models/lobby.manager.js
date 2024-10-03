@@ -1,7 +1,7 @@
 const Lobby = require('./lobby');
 const Host = require('./host');
 const User = require('./user');
-const { generateGUID } = require('../../utils/utils');
+const { generateGUID } = require('../../utils/guid.utils');
 
 class LobbyManager {
     /**
