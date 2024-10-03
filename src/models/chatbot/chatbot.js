@@ -76,13 +76,10 @@ class Chatbot {
                 model: "gpt-3.5-turbo-1106",
             });
 
-            console.log("Question generated.");
-
             this.initialQuestion = completion.choices[0].message.content;
-            console.log(` > Prompt: ${this.initialQuestion}`); // check prompt
-
             this.behaviorMessages.push({role: "assistant", content: completion.choices[0].message.content});
-            return true;
+            
+            return this.initialQuestion;
 
         } catch (error) {
             console.error('An error occurred:', error.message);

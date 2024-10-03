@@ -1,3 +1,5 @@
+const {formatTimestamp } = require('../../utils/date.utils');
+
 module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
 
     // Updates chat data, needed to initialize chatrooms
@@ -42,10 +44,10 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
     });
 
     // Send messages within a chatroom, use .to(chat_guid) to direct messages
-    socket.on('chatMessage', async (guid, chat_guid, messageData) => {
+    socket.on('chatMessage', async (lobby_guid, chat_guid, messageData) => {
         
         console.log("chatMessage: Sending message...");
-        const foundLobby = lobbyManager.getLobby(class_guid);
+        const foundLobby = lobbyManager.getLobby(lobby_guid);
 
         if (foundLobby) {
             const foundChatbot = foundLobby.getChatbot(chat_guid);
@@ -57,7 +59,7 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
 
                 // Dynamic firebase access, record new message
                 const chatroomRef = db.ref(
-                    `lobbies/${guid}/chatrooms/${chat_guid}/messages`
+                    `lobbies/${lobby_guid}/chatrooms/${chat_guid}/messages`
                 );
                 let newMessageRef = chatroomRef.push();
                 newMessageRef.set({
@@ -88,7 +90,7 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
                 console.log("Error: Chatroom not found.");
             }
         } else {
-            console.log("Error: Classroom not found.");
+            console.log("Error: Lobby not found.");
         }
     });
 

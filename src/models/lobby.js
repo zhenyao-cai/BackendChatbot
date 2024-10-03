@@ -149,27 +149,27 @@ class Lobby {
         }
 
         // Randomly assign users per chat
-        let userSockets = Object.keys(this.users);
-        shuffle(userSockets);
-        userSockets.forEach((userSocket, index) => {
+        let usernames = Object.keys(this.users);
+        shuffle(usernames);
+        usernames.forEach((username, index) => {
             // Determine the room index in a round-robin fashion
             const roomIndex = index % totalChatrooms;
             const currentRoomGUID = chatroomGuids[roomIndex];
 
             // Record username in chatroom map
-            const user = this.users[userSocket];
-            const username = user.getUsername();
+            const user = this.users[username];
+            const userSocketId = user.getSocketId();
             this.chatrooms[currentRoomGUID].push(username);
 
             // Join user socket to guid server room
-            const socketObject = io.sockets.sockets.get(userSocket);
-            if (socketObject) {
+            const socketObject = io.sockets.sockets.get(userSocketId);
+            if (socketObject && socketObject.connected) {
                 socketObject.join(currentRoomGUID);
                 socketObject.emit('joinedChatroom', currentRoomGUID);
                 io.to(currentRoomGUID).emit('userJoinedChatroom', username);
                 console.log(`${username} has joined room ${currentRoomGUID}`);
             } else {
-                console.error('Socket not found or is not connected.');
+                console.error(`Socket for ${username} not found or is not connected.`);
             }
         });
 
@@ -178,7 +178,7 @@ class Lobby {
     }
 
     // Initialize a chatbot object for each chatroom within the lobby
-    async initializeBots(guid, io, db) {
+    async initializeBots(lobby_guid, io, db) {
         if (!this.chatSettings) {
             console.log('Chat settings not initialized.');
             return;
@@ -197,32 +197,30 @@ class Lobby {
             );
 
             // Signal for users to jump to chatroom page
-            io.to(chat_guid).emit('chatStarted', chat_guid);
+            io.to(chat_guid).emit('chatStarted', lobby_guid, chat_guid);
 
             // Create the initial prompt to begin the chat
-            const isSuccess = chatbotInstance.initializePrompting();
+            const isSuccess = await chatbotInstance.initializePrompting();
             if (isSuccess) {
                 const botPrompt =
-                    await chatbotInstance.getInitialQuestion();
+                    chatbotInstance.getInitialQuestion();
                 console.log(` > InitialPrompt: ${botPrompt}`);
 
-                // Send to frontend to display prompt in the chatroom
-                io.to(chat_guid).emit('message', {
+                const messageData = {
                     text: botPrompt,
                     sender: chatbotInstance.getBotName(),
                     timestamp: formatTimestamp(new Date().getTime())
-                });
+                };
+
+                // Send to frontend to display prompt in the chatroom
+                io.to(chat_guid).emit('message', messageData);
 
                 // Dynamic firebase access, set up new chatroom entry
                 const chatroomRef = db.ref(
-                    `lobbies/${guid}/chatrooms/${chat_guid}/messages`
+                    `lobbies/${lobby_guid}/chatrooms/${chat_guid}/messages`
                 );
                 const newMessageRef = chatroomRef.push();
-                newMessageRef.set({
-                    timestamp: formatTimestamp(new Date().getTime()),
-                    sender: chatbotInstance.getBotName(),
-                    text: botPrompt
-                });
+                newMessageRef.set(messageData);
 
                 // Map chatbot object to chatroom code
                 this.chatbots[chat_guid] = chatbotInstance;
