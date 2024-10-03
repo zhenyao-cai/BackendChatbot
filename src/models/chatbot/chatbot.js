@@ -1,27 +1,26 @@
+// For test files
+// require('dotenv').config();
+
 const { OpenAI } = require("openai");
-require('dotenv').config();
-const {readFileContent } = require('../utils/utils');
+const {readFileContent } = require('../../../utils/file.utils');
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
 
-class ChatBot {
+class Chatbot {
     /**
      * Constructs a new instance of the ChatBot class.
-     * This class facilitates interactive discussions within a group chat, leveraging the OpenAI API to generate 
-     * conversation prompts and responses. It manages user participation, initiates discussion topics, 
-     * and ensures dynamic interaction throughout the chat session.
-     * 
-     * @param {Array} users - A list of user identifiers participating in the chat.
-     * @param {String} topic - The central topic or theme of the chat discussion.
+     * Uses OpenAI API to generate prompts and responses,
+     * manages user participation.
+     * @param {Array} users - A list of users participating in the chat.
+     * @param {String} topic - The topic of the chat discussion.
      * @param {String} [botname='ChatZot'] - The name of the bot.
-     * @param {Number} [assertiveness=2] - The bot's assertiveness level, affecting its participation ratio.
+     * @param {Number} [assertiveness=2] - The bot's assertiveness level, affects participation ratio.
      */
-    constructor(users, topic, botname='ChatZot', assertiveness=2) {
+    constructor(users, topic, botname="ChatZot", assertiveness=2) {
         this.users = users;
-        console.log(this.users);
-        console.log(typeof(this.users));
+        console.log("Users in chat:", this.users);
         this.topic = topic;
         this.initialQuestion = '';
         this.botname = botname;
@@ -33,16 +32,21 @@ class ChatBot {
         } else if (this.assertiveness == 2) {
             this.participationRatio = 0.15;
         } else {this.participationRatio = 0.25;}
-        
-        console.log("initialized variables");
 
         this.messageRatios = [];
         this.countPerUser = [];
         this.messageCount = 0;
 
-        this.behaviorPrompt = readFileContent("lib/ChatBot/Prompts/behavior_prompt.txt");
-        this.chimePrompt = readFileContent("lib/ChatBot/Prompts/chime_prompt.txt");
-        this.participationPrompt = readFileContent("lib/ChatBot/Prompts/participation_prompt.txt");
+        this.behaviorPrompt = readFileContent(
+            'src/models/chatbot/prompts/behavior_prompt.txt'
+        );
+        this.chimePrompt = readFileContent(
+            'src/models/chatbot/prompts/chime_prompt.txt'
+        );
+        this.participationPrompt = readFileContent(
+            'src/models/chatbot/prompts/participation_prompt.txt'
+        );
+        
         this.conclusionPrompt = "There is only {{time}} minute left in this discussion. Please prompt the users to WRAP UP THEIR DISCUSSION by supplying their final remarks.";
 
         this.behaviorPrompt = this.behaviorPrompt.replace("{{users}}", users.toString());
@@ -55,22 +59,27 @@ class ChatBot {
         // CALL INITIALIZE PROMPTING AFTER CONSTRUCTOR
     }
 
+    getBotName() {
+        return this.botname;
+    }
+
+    getInitialQuestion() {
+        return this.initialQuestion;
+    }
+
     async initializePrompting() {
         try {
-
-            console.log("starting question generation...");
+            console.log("Starting question generation...");
             
             let completion = await openai.chat.completions.create({
                 messages: this.behaviorMessages,
                 model: "gpt-3.5-turbo-1106",
             });
 
-            console.log("question generated.");
-
             this.initialQuestion = completion.choices[0].message.content;
-
             this.behaviorMessages.push({role: "assistant", content: completion.choices[0].message.content});
-            return true;
+            
+            return this.initialQuestion;
 
         } catch (error) {
             console.error('An error occurred:', error.message);
@@ -219,11 +228,6 @@ class ChatBot {
         // 2: conclusion
         // 3: inactivity
     }
-
-    getInitialQuestion() {
-        return this.initialQuestion;
-    }
 }
 
-
-module.exports = ChatBot;
+module.exports = Chatbot;

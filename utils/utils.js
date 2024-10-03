@@ -1,3 +1,5 @@
+// DELETE AFTER SPLITTING UTIL IMPORTS
+
 const fs = require('fs');
 
 // Function to generate a unique 4-character GUID
@@ -30,6 +32,5 @@ function readFileContent(fileName) {
       return null;
     }
 }
-
 
 module.exports = { generateGUID, formatTimestamp, readFileContent };
