@@ -7,7 +7,7 @@
 ## Directory Structure
 #### src/
 Contains all source code, organized into models and managers. Contains entry-point file index.js, and socket.js for WebSocket logic.  
-Naming conventions: lowerCamelCase.js, {name}.handler.js, <name>.manager.js
+Naming conventions: lowerCamelCase.js, {name}.handler.js, {name}.manager.js
 #### tests/
 Contains all tests, mirroring the structure of the src/ directory.  
 Naming conventions: {name}.test.js
