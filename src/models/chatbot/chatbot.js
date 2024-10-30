@@ -43,15 +43,21 @@ class Chatbot {
         this.participationPrompt = readFileContent(
             'src/models/chatbot/prompts/participation_prompt.txt'
         );
+        this.classificationPrompt = readFileContent(
+            // 'src/models/chatbot/prompts/hank_classification_prompt.txt'
+            'src/models/chatbot/prompts/classification_prompt.txt'
+        );
         
         this.conclusionPrompt = "There is only {{time}} minute left in this discussion. Please prompt the users to WRAP UP THEIR DISCUSSION by supplying their final remarks.";
 
         this.behaviorPrompt = this.behaviorPrompt.replace("{{users}}", users.toString());
         this.behaviorPrompt = this.behaviorPrompt.replace("{{topic}}", topic);
         this.chimePrompt = this.chimePrompt.replace("{{botname}}", botname);
+        this.classificationPrompt = this.classificationPrompt.replace("{{topic}}", topic);
 
         this.behaviorMessages = [{role: "system", content: this.behaviorPrompt}];
         this.chimeMessages = [{role: "system", content: this.chimePrompt}];
+        this.classificationMessages = [{role: "system", content: this.classificationPrompt}];
 
         // CALL INITIALIZE PROMPTING AFTER CONSTRUCTOR
     }
@@ -75,7 +81,8 @@ class Chatbot {
 
             this.initialQuestion = completion.choices[0].message.content;
             this.behaviorMessages.push({role: "assistant", content: completion.choices[0].message.content});
-            
+            this.classificationMessages.push({role: "assistant", content: completion.choices[0].message.content});
+
             return this.initialQuestion;
 
         } catch (error) {
@@ -90,8 +97,18 @@ class Chatbot {
         console.log("lowParticipationUser")
         this.chimeMessages.push({role: "user", name: user, content: message});
         this.behaviorMessages.push({role: "user", name: user, content: message});
+        this.classificationMessages.push({role: "user", name: user, content: message});
 
         try {
+
+            const classificationResponse = await openai.chat.completions.create({
+                messages: this.classificationMessages,
+                model: "gpt-3.5-turbo-1106"
+            });
+
+            const classificationResult = classificationResponse.choices[0].message.content.trim();
+            console.log(`Classification result for "${message}": ${classificationResult}`);
+
             let completion  = await openai.chat.completions.create({
                 messages: this.chimeMessages,
                 model: "gpt-3.5-turbo-1106"
