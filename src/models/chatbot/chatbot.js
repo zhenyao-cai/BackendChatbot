@@ -94,7 +94,8 @@ class Chatbot {
     async botMessageListener(user, message, timestamp) {
         // Recieves messages as input and decides whether to respond
         let lowParticipationUser = this.participationTracker(user);
-        console.log("lowParticipationUser")
+        // console.log("lowParticipationUser")
+
         this.chimeMessages.push({role: "user", name: user, content: message});
         this.behaviorMessages.push({role: "user", name: user, content: message});
         this.classificationMessages.push({role: "user", name: user, content: message});
@@ -108,6 +109,15 @@ class Chatbot {
 
             const classificationResult = classificationResponse.choices[0].message.content.trim();
             console.log(`Classification result for "${message}": ${classificationResult}`);
+            const resultDict = {}, regex = /(\w+ Code): \[([^\]]+)\]/g;
+            let match;
+            while ((match = regex.exec(classificationResult)) !== null) {
+                const key = match[1], value = match[2];
+                resultDict[key] = value;
+            }
+            console.log(`Classification Parsing Results:`)
+            console.log(resultDict);
+
 
             let completion  = await openai.chat.completions.create({
                 messages: this.chimeMessages,
@@ -193,9 +203,12 @@ class Chatbot {
                     });
 
                     this.behaviorMessages.push({role: "assistant", content: completion.choices[0].message.content});
+                    this.classificationMessages.push({role: "assistant", content: completion.choices[0].message.content});
 
                     return completion.choices[0].message.content;
-                }
+                } else {
+                    this.classificationMessages.push({role: "assistant", content: completion.choices[0].message.content});
+				}
 
                 return completion.choices[0].message.content;
 
@@ -210,6 +223,7 @@ class Chatbot {
                 });
 
                 this.behaviorMessages.push({role: "assistant", content: completion1.choices[0].message.content});
+                this.classificationMessages.push({role: "assistant", content: completion1.choices[0].message.content});
 
                 return completion1.choices[0].message.content;
 
@@ -225,6 +239,7 @@ class Chatbot {
                 });
 
                 this.behaviorMessages.push({role: "assistant", content: completion2.choices[0].message.content});
+                this.classificationMessages.push({role: "assistant", content: completion2.choices[0].message.content});
 
                 return completion2.choices[0].message.content;
             case 3:
@@ -237,6 +252,7 @@ class Chatbot {
                 });
 
                 this.behaviorMessages.push({role: "assistant", content: completion3.choices[0].message.content});
+                this.classificationMessages.push({role: "assistant", content: completion3.choices[0].message.content});
 
                 return completion3.choices[0].message.content;
 

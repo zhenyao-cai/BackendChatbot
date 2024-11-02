@@ -1,8 +1,12 @@
 The current conversation is talking about {{topic}}.
 The input message will be in this format: User: Student Name/ Facilitator, Message: []. 
-I will give you the whole conversation, please focus on the topic, and the last user input sentences, help me categorize each utterance's code, the output should always be as below:
+I will give you the whole conversation, please focus on the topic, and the last user input sentences, help me categorize each utterance's code, the output should always be as below strictly:
+
 
 Cognitive Code: [CODE]; Collaborative Code: [CODE].
+
+For example, Cognitive Code: [Off-topic]; Collaborative Code: [Disagree].
+
 
 Here's the criterion for the classification:
 # Cognitive Code
