@@ -112,7 +112,8 @@ class Chatbot {
             const resultDict = {}, regex = /(\w+ Code): \[([^\]]+)\]/g;
             let match;
             while ((match = regex.exec(classificationResult)) !== null) {
-                const key = match[1], value = match[2];
+                // const key = match[1], value = match[2];
+                const key = match[1].toLowerCase().replace(/ /g, "_"), value = match[2];
                 resultDict[key] = value;
             }
             console.log(`Classification Parsing Results:`)
