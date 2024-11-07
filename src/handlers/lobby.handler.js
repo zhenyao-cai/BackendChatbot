@@ -27,7 +27,7 @@ module.exports = function registerLobbyHandlers(socket, io, db, lobbyManager) {
         }
 
         console.log(`> Request to join: ${lobbyId} by user: ${username}`);
-        console.log('Existing lobbies: ' + lobbyManager.getAllLobbyIds());
+        console.log('Existing lobbies: ' + lobbyManager.getAllLobbyGUIDs());
 
         const result = lobbyManager.joinLobby(lobbyId, socket.id, username);
 
