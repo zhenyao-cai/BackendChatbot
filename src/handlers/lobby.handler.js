@@ -19,6 +19,13 @@ module.exports = function registerLobbyHandlers(socket, io, db, lobbyManager) {
 
     // Create new user object, join user socket to existing GUID (lobbyId)
     socket.on('joinLobby', async (lobbyId, username) => {
+
+        if (!lobbyId) { 
+            console.log(`> Missing lobbyId for user: ${username}`);
+            socket.emit('joinLobbyError', 'Missing lobbyId, cannot join lobby');
+            return;
+        }
+
         console.log(`> Request to join: ${lobbyId} by user: ${username}`);
         console.log('Existing lobbies: ' + lobbyManager.getAllLobbyIds());
 
