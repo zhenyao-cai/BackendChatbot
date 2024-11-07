@@ -32,13 +32,12 @@ module.exports = function registerLobbyHandlers(socket, io, db, lobbyManager) {
         const result = lobbyManager.joinLobby(lobbyId, socket.id, username);
 
         if (result.success) {
-            console.log(result.message);
-
+            console.log(`> Success: ${result.message}`);
             socket.join(lobbyId);
             socket.emit('joinedLobby', lobbyId);
             io.to(lobbyId).emit('userJoinedLobby', username);
         } else {
-            console.log(result.message);
+            console.log(`> Failure: ${result.message}`);
             socket.emit('joinLobbyError', result.message);
         }
     });
