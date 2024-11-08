@@ -1,30 +1,27 @@
-The current conversation is talking about {{topic}}.
-The input message will be in this format: User: Student Name/ Facilitator, Message: []. 
-I will give you the whole conversation, please focus on the topic, and the last user input sentences, help me categorize each utterance's code, the output should always be as below strictly:
-
+The current discussion is talking about {{topic}}.
+I will give you the whole conversation between a teacher named "teacher" and students, please help me categorize the latest message that the student entered into the Cognitive Code
+and the Collaborative Code I provided below, pick a most appropriate category from each code, the output should always be as below strictly:
 
 Cognitive Code: [CODE]; Collaborative Code: [CODE].
 
 For example, Cognitive Code: [Off-topic]; Collaborative Code: [Disagree].
 
 
-Here's the criterion for the classification:
+Here's the Cognitive Code and the Collaborative Code mentioned above:
 # Cognitive Code
-    Off-topic - Irrelevant to the discussion content
-    Confusion - Statements explicitly indicate lack of understanding or questions that seek for clarification
-    Incorrect - Make obvious incorrect statements or make mistakes in their statements
-    Incomplete - The statement only has claims but lacks explanations or evidence to support the claim. Statements that only provide the solution/answer but lack an explanation or reasoning how exactly it works.
-    Complete - Provide complete statements associated with the task, supporting claims with explanations and evidence.
-    NA - No cognitive statement
+    [Off-topic] - Irrelevant to the discussion content
+    [Confusion] - Statements explicitly indicate lack of understanding or questions that seek for clarification
+    [Incorrect] - Make obvious incorrect statements or make mistakes in their statements
+    [Incomplete] - The statement only has claims but lacks explanations or evidence to support the claim. Statements that only provide the solution/answer but lack an explanation or reasoning how exactly it works.
+    [Complete] - Provide complete statements associated with the task, supporting claims with explanations and evidence.
+    [NA] - No cognitive statement
 
 # Collaborative Code
-    New - Introduces an entirely new idea or initiates a new sub-topic within the discussion.
-    Agree - Expresses agreement with another student's idea without adding new information or perspectives.
-    Extend - Expresses agreement with another student's idea while also adding new information or extending the discussion with additional insights.
-    Disagree - Expresses disagreement with another student's idea, potentially offering an opposing viewpoint.
-    Compromise - Shows a willingness to find middle ground or merge different viewpoints from the discussion.
-    Integrate - Synthesizes opposing views or connects different topics/ideas to create a cohesive argument or perspective.
-    Question - Pose a question to clarify details, deeper understanding of the topic under discussion, or ask for other students’ opinions.
-    Answer - Provides a response to questions raised by other students.
-    NA - Used for messages that are directed towards the facilitator or are part of the facilitation process, rather than interacting with other students.
-
+    [New] - Introduces an entirely new idea or initiates a new sub-topic within the discussion.
+    [Agree] - Expresses agreement with another student's idea without adding new information or perspectives.
+    [Extend] - Expresses agreement with another student's idea while also adding new information or extending the discussion with additional insights.
+    [Disagree] - Expresses disagreement with another student's idea, potentially offering an opposing viewpoint.
+    [Integrate] - Synthesizes opposing views or connects different topics/ideas to create a cohesive argument or perspective.
+    [Question] - Pose a question to clarify details, deeper understanding of the topic under discussion, or ask for other students’ opinions.
+    [Answer] - Provides a response to questions raised by other students.
+    [NA] - Do not fit any Collaborative Code
