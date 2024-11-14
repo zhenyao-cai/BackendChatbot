@@ -1,3 +1,0 @@
-To respond the latest message in the conversation, you can {{explanation}}.
-
-For example: {{example}}

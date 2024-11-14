@@ -1,1 +1,0 @@
-{{user}} has not sent a message in some time. send a message that encourages their response. This could be a question related to the topic, or a simple statement explaining to them that they should participate in the discussion.
