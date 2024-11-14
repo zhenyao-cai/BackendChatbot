@@ -196,6 +196,9 @@ class Lobby {
                 this.chatSettings.botName, this.chatSettings.assertiveness
             );
 
+            // Method initialize time tracker, can't be async
+            chatbotInstance.initializeTimeTracker(io, chat_guid);
+
             // Signal for users to jump to chatroom page
             io.to(chat_guid).emit('chatStarted', lobby_guid, chat_guid);
 

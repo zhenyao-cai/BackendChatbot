@@ -3,7 +3,7 @@
 
 const { OpenAI } = require("openai");
 const {readFileContent } = require('../../../utils/file.utils');
-
+const {formatTimestamp } = require('../../../utils/date.utils');
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
@@ -67,6 +67,11 @@ class Chatbot {
         this.example = '';
         this.manager = new WorkerManager();
 
+        // Initialize the time tracker worker
+        this.timeTracker = new Worker('./src/handlers/time_tracker.js');
+		// Send the initial list of users to the timeTracker worker
+
+        
         this.botname = botname;
         this.assertiveness = assertiveness;
 
@@ -108,12 +113,43 @@ class Chatbot {
         // CALL INITIALIZE PROMPTING AFTER CONSTRUCTOR
     }
 
+    initializeTimeTracker(io, chat_guid) {
+        this.timeTracker.postMessage({
+            type: 'initializeUsers',
+            users: this.users
+        });
+
+        
+        // Set up the worker's message listener
+        // This method gets called by time_tracker.js every 30 seconds to check inactive participant
+        this.timeTracker.on('message', async (message) => {
+            if (message.type === 'inactiveParticipants') {
+                let inactiveUsers = message.participants.join(', ');
+                console.log(`Notifying Message for Inclusivity to users: "${inactiveUsers}"`);
+                let response = await this.sendMessage(4, inactiveUsers);
+                console.log(` > messageData to ${chat_guid}: ${response}`);
+                if (response) {
+                    io.to(chat_guid).emit('message', { 
+                        sender: this.getBotName(), 
+                        text: response, 
+                        timestamp: formatTimestamp(new Date().getTime()) 
+                    });
+                    response = null;
+                }
+            }
+        });    
+    }
+
     getBotName() {
         return this.botname;
     }
 
     getInitialQuestion() {
         return this.initialQuestion;
+    }
+
+    getUsers() {
+        return this.users;
     }
 
     async initializePrompting() {
@@ -148,13 +184,24 @@ class Chatbot {
         console.log("\nclassification prompts", this.classificationMessages);
 
         try {
+            console.log(`"this.classificationMessages.length is "${this.classificationMessages.length}"`);
+            // Start time tracking when the first message arrives
+            // if (this.classificationMessages.length === 3 ) {
+            //     this.timeTracker.postMessage({ type: 'start' });
+            // }
+
+            // Update participant's activity in the time tracker
+            this.timeTracker.postMessage({
+                type: 'activity',
+                participantId: user,
+                timestamp
+            });
 
             // Use the latest K messages to classify
             while ( this.classificationMessages.length > 11 ) {
                 this.classificationMessages.splice(1, 1);
             }
             
-
             const classificationResponse = await openai.chat.completions.create({
                 messages: this.classificationMessages,
                 model: "gpt-3.5-turbo-1106"
@@ -171,27 +218,7 @@ class Chatbot {
                 const key = match[1].toLowerCase().replace(/ /g, "_"), value = match[2];
                 resultDict[key] = value;
             }
-            // let completion  = await openai.chat.completions.create({
-            //     messages: this.chimeMessages,
-            //     model: "gpt-3.5-turbo-1106"
-            // })
 
-            // console.log(completion.choices[0].message.content);
-
-            // if (completion.choices[0].message.content == "...") {
-            //     this.chimeMessages.push({role: "assistant", content: "..."});
-
-            //     if (lowParticipationUser) {
-            //         let response = await this.sendMessage(1, user=user);
-            //         console.log("participation triggered.")
-            //         return response;
-            //     }
-
-            // } else {
-            //     this.chimeMessages.push({role: "assistant", content: "CHIME."});
-            //     let response = await this.sendMessage(0);
-            //     return response;
-            // }
             try{
                 const workerMessage = await this.manager.sendTask(resultDict);
 
@@ -329,7 +356,23 @@ class Chatbot {
                 this.behaviorMessages.push({role: "assistant", content: completion3.choices[0].message.content});
 
                 return completion3.choices[0].message.content;
-
+            
+            case 4:
+                // Inclusivity prompt targeting a specific inactive user
+                let inclusivityPrompt = `Tell users to give the response in the chat like this - Hey {{user}}, we’d love to hear your thoughts on the discussion. Don’t hesitate to share!`;
+                inclusivityPrompt = inclusivityPrompt.replace("{{user}}", user);
+                console.log(inclusivityPrompt);
+                
+                // this.behaviorMessages.push({ role: "system", content: inclusivityPrompt });
+    
+                let completion4 = await openai.chat.completions.create({
+                    messages: [{ role: "system", content: inclusivityPrompt }], // this.behaviorMessages,
+                    model: "gpt-3.5-turbo-1106"
+                });
+                console.log("$$$$$$$$$$$$$$$$$$$" + completion4.choices[0].message.content);
+                // this.behaviorMessages.push({ role: "assistant", content: completion4.choices[0].message.content });
+    
+                return completion4.choices[0].message.content;
         }
 
         // 0: chime
@@ -340,3 +383,4 @@ class Chatbot {
 }
 
 module.exports = Chatbot;
+
