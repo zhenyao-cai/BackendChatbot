@@ -17,22 +17,27 @@ module.exports = function registerLobbyHandlers(socket, io, db, lobbyManager) {
         });
     });
 
-    // Create new user object, join user socket to existing GUID
+    // Create new user object, join user socket to existing GUID (lobbyId)
     socket.on('joinLobby', async (guid, username) => {
+
+        if (!guid) { 
+            console.log(`> Missing lobbyId for user: ${username}`);
+            socket.emit('joinLobbyError', 'Missing lobbyId, cannot join lobby');
+            return;
+        }
+
         console.log(`> Request to join: ${guid} by user: ${username}`);
         console.log('Existing lobbies: ' + lobbyManager.getAllLobbyGUIDs());
-    
-        const result = lobbyManager.joinLobby(guid, socket.id, username);        
+
+        const result = lobbyManager.joinLobby(guid, socket.id, username);
 
         if (result.success) {
-            console.log(result.message);
-
+            console.log(`> Success: ${result.message}`);
             socket.join(guid);
             socket.emit('joinedLobby', guid);
             io.to(guid).emit('userJoinedLobby', username);
-        }
-        else {
-            console.log(result.message);
+        } else {
+            console.log(`> Failure: ${result.message}`);
             socket.emit('joinLobbyError', result.message);
         }
     });
