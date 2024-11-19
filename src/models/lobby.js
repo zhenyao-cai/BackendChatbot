@@ -133,13 +133,14 @@ class Lobby {
         }
 
         // Divide into correct number of chatrooms
-        let totalChatrooms = 0;
-        if (totalUsers < this.minChatroomSize){
-            totalChatrooms = 1;
-        } else {
-            totalChatrooms = Math.floor(totalUsers/this.minChatroomSize);
-        }
+        // let totalChatrooms = 0;
+        // if (totalUsers < this.minChatroomSize){
+        //     totalChatrooms = 1;
+        // } else {
+        //     totalChatrooms = Math.floor(totalUsers/this.minChatroomSize);
+        // }
 
+        let totalChatrooms = 2;
         // Initialize chatrooms with GUIDS
         let chatroomGuids = []; // Easy access to chatroom guids
         for (let i = 0; i < totalChatrooms; i++) {

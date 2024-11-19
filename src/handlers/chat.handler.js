@@ -9,9 +9,12 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
 
         if (foundLobby) { 
             foundLobby.chatSettings = {
-                botname: chatData.botname, chatLength: chatData.chatLength,
+                botname: chatData.botname,
+                chatLength: chatData.chatLength,
                 assertiveness: chatData.assertiveness,
-                topic: chatData.topic, chatName: chatData.chatName
+                topic: chatData.topic,
+                chatName: chatData.chatName,
+                participantsPerRoom: chatData.participantsPerRoom
             }
         } else {
             console.log("Error: Lobby not found.")
