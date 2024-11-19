@@ -139,8 +139,8 @@ class Lobby {
         // } else {
         //     totalChatrooms = Math.floor(totalUsers/this.minChatroomSize);
         // }
-
-        let totalChatrooms = 2;
+        const participantsPerRoom = this.getChatSettings().participantsPerRoom;
+        let totalChatrooms = Math.ceil(totalUsers / participantsPerRoom)
         // Initialize chatrooms with GUIDS
         let chatroomGuids = []; // Easy access to chatroom guids
         for (let i = 0; i < totalChatrooms; i++) {
