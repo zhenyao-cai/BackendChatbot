@@ -191,11 +191,7 @@ class Chatbot {
             // }
 
             // Update participant's activity in the time tracker
-            this.timeTracker.postMessage({
-                type: 'activity',
-                participantId: user,
-                timestamp
-            });
+            
 
             // Use the latest K messages to classify
             while ( this.classificationMessages.length > 11 ) {
@@ -218,6 +214,13 @@ class Chatbot {
                 const key = match[1].toLowerCase().replace(/ /g, "_"), value = match[2];
                 resultDict[key] = value;
             }
+
+            this.timeTracker.postMessage({
+                type: 'activity',
+                participantId: user,
+                cognitive_code: resultDict['cognitive_code'] || 'NA',
+                timestamp
+            });
 
             try{
                 const workerMessage = await this.manager.sendTask(resultDict);
