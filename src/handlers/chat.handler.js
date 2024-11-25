@@ -14,7 +14,8 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
                 assertiveness: chatData.assertiveness,
                 topic: chatData.topic,
                 chatName: chatData.chatName,
-                participantsPerRoom: chatData.participantsPerRoom
+                participantsPerRoom: chatData.participantsPerRoom,
+                testMode: chatData.testMode
             }
         } else {
             console.log("Error: Lobby not found.")
