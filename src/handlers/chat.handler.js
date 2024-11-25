@@ -9,9 +9,13 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
 
         if (foundLobby) { 
             foundLobby.chatSettings = {
-                botname: chatData.botname, chatLength: chatData.chatLength,
+                botname: chatData.botname,
+                chatLength: chatData.chatLength,
                 assertiveness: chatData.assertiveness,
-                topic: chatData.topic, chatName: chatData.chatName
+                topic: chatData.topic,
+                chatName: chatData.chatName,
+                participantsPerRoom: chatData.participantsPerRoom,
+                testMode: chatData.testMode
             }
         } else {
             console.log("Error: Lobby not found.")
@@ -51,10 +55,7 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
 
         if (foundLobby) {
             const foundChatbot = foundLobby.getChatbot(chat_guid);
-
-            if (foundChatbot) {
-                // Send message to chat
-                io.to(chat_guid).emit('message', messageData);
+            io.to(chat_guid).emit('message', messageData);
                 console.log(` > messageData to ${chat_guid}: ${messageData.text}`);
 
                 // Dynamic firebase access, record new message
@@ -68,6 +69,7 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
                     text: messageData.text,
                 });
 
+            if (foundChatbot) {
                 const respond = await foundChatbot.botMessageListener(
                     messageData.sender, messageData.text, messageData.timestamp
                 );
