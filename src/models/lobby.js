@@ -185,31 +185,62 @@ class Lobby {
             return;
         }
 
+        let cur_idx = 0;
         for (let chat_guid in this.chatrooms) {
-            console.log('Creating chatbot for room: ' + chat_guid);
-            console.log('Users:');
             for (let usernames of this.chatrooms[chat_guid]){
                 console.log(usernames);
             }
 
+            const with_chatbot = !this.chatSettings.testMode || cur_idx < Object.keys(this.chatrooms).length / 2;
+            if (with_chatbot) {
+                console.log('Creating chatbot for room: ' + chat_guid);
+            } else {
+                console.log('creating room. No chatbot will be made for ' + chat_guid);
+            }
             const chatbotInstance = new Chatbot(
                 this.chatrooms[chat_guid], this.chatSettings.topic,
                 this.chatSettings.botName, this.chatSettings.assertiveness
             );
+            if (with_chatbot) {
 
-            // Signal for users to jump to chatroom page
-            io.to(chat_guid).emit('chatStarted', lobby_guid, chat_guid);
+                io.to(chat_guid).emit('chatStarted', lobby_guid, chat_guid);
 
-            // Create the initial prompt to begin the chat
-            const isSuccess = await chatbotInstance.initializePrompting();
-            if (isSuccess) {
-                const botPrompt =
-                    chatbotInstance.getInitialQuestion();
-                console.log(` > InitialPrompt: ${botPrompt}`);
+                const isSuccess = await chatbotInstance.initializePrompting();
+                if (isSuccess) {
+                    const botPrompt =
+                        chatbotInstance.getInitialQuestion();
+                    console.log(` > InitialPrompt: ${botPrompt}`);
 
+                    const messageData = {
+                        text: botPrompt,
+                        sender: chatbotInstance.getBotName(),
+                        timestamp: formatTimestamp(new Date().getTime())
+                    };
+
+                    // Send to frontend to display prompt in the chatroom
+                    io.to(chat_guid).emit('message', messageData);
+
+                    // Dynamic firebase access, set up new chatroom entry
+                    const chatroomRef = db.ref(
+                        `lobbies/${lobby_guid}/chatrooms/${chat_guid}/messages`
+                    );
+                    const newMessageRef = chatroomRef.push();
+                    newMessageRef.set(messageData);
+
+                    // Map chatbot object to chatroom code
+                    this.chatbots[chat_guid] = chatbotInstance;
+                } else {
+                    console.log("Error: Prompt failed to initialize.");
+                }
+            } else {
+                // Signal for users to jump to chatroom page
+                io.to(chat_guid).emit('chatStarted', lobby_guid, chat_guid);
+
+                const initialPrompt = `This chatroom will not have a chatbot facilitator. The  \
+                topic your group should discuss is ${this.chatSettings.topic}`;
                 const messageData = {
-                    text: botPrompt,
-                    sender: chatbotInstance.getBotName(),
+                    text: initialPrompt,
+                    sender: "Teacher",
                     timestamp: formatTimestamp(new Date().getTime())
                 };
 
@@ -223,11 +254,9 @@ class Lobby {
                 const newMessageRef = chatroomRef.push();
                 newMessageRef.set(messageData);
 
-                // Map chatbot object to chatroom code
-                this.chatbots[chat_guid] = chatbotInstance;
-            } else {
-                console.log("Error: Prompt failed to initialize.");
+                this.chatbots[chat_guid] = null;
             }
+            cur_idx += 1;
         }
     }
 }
