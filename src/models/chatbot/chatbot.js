@@ -12,9 +12,10 @@ const { Worker } = require('worker_threads');
 // const { MessageFilesPage } = require("openai/resources/beta/threads/messages/files.mjs");
 
 class WorkerManager {
-    constructor() {
+    constructor(rulesOrder) {
         this.worker = new Worker('./src/handlers/workers.js');
         this.promises = new Map();
+        this.rulesOrder = rulesOrder;
         this.worker.on('error', (error) => console.error("Worker error:", error));
         this.worker.on('exit', (code) => console.log(`Worker exited with code: ${code}`));
         this.worker.on('message', (response) => this.handleTask(response));
@@ -25,7 +26,7 @@ class WorkerManager {
         return new Promise((resolve, reject) => {
             const messageId = Math.random().toString(36).substring(2, 15);
             this.promises.set(messageId, { resolve, reject });
-            this.worker.postMessage({ ...data, messageId });
+            this.worker.postMessage({ ...data, messageId, rulesOrder: this.rulesOrder});
         });
     }
 
@@ -58,14 +59,14 @@ class Chatbot {
      * @param {String} [botname='ChatZot'] - The name of the bot.
      * @param {Number} [assertiveness=2] - The bot's assertiveness level, affects participation ratio.
      */
-    constructor(users, topic, botname="ChatZot", assertiveness=2) {
+    constructor(users, topic, botname="ChatZot", assertiveness=2, rulesOrder = ["cognitive", "collaborative", "productivity"]) {
         this.users = users;
         console.log("Users in chat:", this.users);
         this.topic = topic;
         this.initialQuestion = '';
         this.explanation = ''; 
         this.example = '';
-        this.manager = new WorkerManager();
+        this.manager = new WorkerManager(rulesOrder);
 
         // Initialize the time tracker worker
         this.timeTracker = new Worker('./src/handlers/time_tracker.js');
@@ -227,16 +228,38 @@ class Chatbot {
 
                 console.log("\n\nworker classify result", workerMessage);
                 let temphelper = this.helperPrompt;
-                if (workerMessage === 'build'){
-                    temphelper = temphelper.replace("{{explanation}}", "Encourage students to extend from others idea");
-                    temphelper = temphelper.replace("{{example}}", "Why do you agree on ... Do you have any additional thoughts?");
-                }else if (workerMessage === 'challenge'){
-                    temphelper = temphelper.replace("{{explanation}}", "Encourage students to pose counterarguments");
-                    temphelper = temphelper.replace("{{example}}", "Does anyone see this differently?");
-                }else if (workerMessage === 'peers_encourage'){
-                    temphelper = temphelper.replace("{{explanation}}", "Encourage group discussion when students ask for hint or express confusion");
-                    temphelper = temphelper.replace("{{example}}", "Does anyone want to jump in and help out with this?");
+
+                switch (workerMessage){
+                    case 'build':
+                        temphelper = temphelper.replace("{{explanation}}", "Encourage students to extend from others idea");
+                        temphelper = temphelper.replace("{{example}}", "Why do you agree on ... Do you have any additional thoughts?");
+                        break;
+                    case 'challenge':
+                        temphelper = temphelper.replace("{{explanation}}", "Encourage students to pose counterarguments");
+                        temphelper = temphelper.replace("{{example}}", "Does anyone see this differently?");
+                        break;
+                    case 'peers_encourage':
+                        temphelper = temphelper.replace("{{explanation}}", "Encourage group discussion when students ask for hint or express confusion");
+                        temphelper = temphelper.replace("{{example}}", "Does anyone want to jump in and help out with this?");
+                        break;
+                    case 'comprehension':
+                        temphelper = temphelper.replace("{{explanation}}", "Asks for a process, reasons or term to be described or defined");
+                        temphelper = temphelper.replace("{{example}}", "Can you explain your thinking to the group?");
+                        break;
+                    case 'hint':
+                        temphelper = temphelper.replace("{{explanation}}", "If the student's knowledge of the material is incomplete.");
+                        temphelper = temphelper.replace("{{example}}", "'Can anyone help?' or 'Have you thought about … ?' or 'How about … ?'");
+                        break;
+                    case 'prompt':
+                        temphelper = temphelper.replace("{{explanation}}", "Help students when students display misconceptions, gaps in understanding, or errors in reasoning");
+                        temphelper = temphelper.replace("{{example}}", "'What led you to this conclusion?' or 'Does anyone have different opinions?'");
+                        break;
+                    case 'redirect':
+                        temphelper = temphelper.replace("{{explanation}}", "Steer a conversation back to the topic in a discussion");
+                        temphelper = temphelper.replace("{{example}}", "Thank you for sharing, now let's bring our focus back to [topic]");
+                        break;
                 }
+                
 
                 if (workerMessage != 'NA'){
                     this.behaviorMessages.push({role: "system", content: temphelper});
