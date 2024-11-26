@@ -67,23 +67,24 @@ module.exports = function registerLobbyHandlers(socket, io, db, lobbyManager) {
 
     // Not implemented on front-end
     socket.on('leaveLobby', async (guid) => {
-        const foundLobby = lobbyManager.getLobby(guid);
+        // const foundLobby = lobbyManager.getLobby(guid);
         // disconnect processes
         
-        //console.log("leaveLobby");
-        //     const foundLobby = lobbyManager.getLobby(guid);
+        console.log("leaveLobby");
+        console.log("guid", guid);
+            const foundLobby = lobbyManager.getLobby(guid);
 
-        //     if (foundLobby && (username in foundLobby.users)) {
-        //         foundLobby.removeUser(username);
-        //         socket.leave(guid);
-        //         socket.emit('leftLobby', guid);
-        //         io.to(guid).emit('userLeftLobby', username);
+            if (foundLobby && (username in foundLobby.users)) {
+                foundLobby.removeUser(username);
+                socket.leave(guid);
+                socket.emit('leftLobby', guid);
+                io.to(guid).emit('userLeftLobby', username);
 
-        //         if (Object.keys(foundLobby.users).length === 0) {
-        //             console.log("lobby is removed1");
-        //             const isSuccess = lobbyManager.removeLobby(guid); // Delete the lobby if empty
-        //             // can add additional code for error check
-        //         }
-        //     }
+                if (Object.keys(foundLobby.users).length === 0) {
+                    console.log("lobby is removed1");
+                    const isSuccess = lobbyManager.removeLobby(guid); // Delete the lobby if empty
+                    // can add additional code for error check
+                }
+            }
     });
 };
