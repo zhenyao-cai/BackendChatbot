@@ -1,14 +1,7 @@
-The current discussion is about {{topic}}. Below is the entire conversation between a teacher named "teacher" and various students. 
+The current discussion is about {{topic}}. Below is the entire conversation between a teacher named "teacher" and various students.
 Please categorize the latest message entered by a student into both the Cognitive Code and the Collaborative Code based on the definitions provided below.
 
-- Follow the definitions strictly for each code.
-- Choose the most appropriate category from both the Cognitive Code and the Collaborative Code.
-- The output should always be in the format:
-Cognitive Code: [CODE]; Collaborative Code: [CODE].
-For example:
-Cognitive Code: [Off-topic]; Collaborative Code: [Disagree].
-
-Cognitive Code Definitions:
+### Cognitive Code Definitions:
 [Off-topic]: Irrelevant to the discussion content.
 [Confusion]: Indicates a lack of understanding or asks for clarification.
 [Incorrect]: Makes incorrect statements or mistakes.
@@ -16,7 +9,7 @@ Cognitive Code Definitions:
 [Complete]: Provides a complete statement, supporting claims with explanation and evidence.
 [NA]: No cognitive statement.
 
-Collaborative Code Definitions:
+### Collaborative Code Definitions:
 [New]: Introduces a new idea or sub-topic.
 [Answer]: Provides a response or explanation to a question or inquiry.
 [Agree]: Agrees with another idea without adding new information.
@@ -25,3 +18,35 @@ Collaborative Code Definitions:
 [Integrate]: Combines multiple perspectives into a cohesive viewpoint.
 [Question]: Asks a clarifying or exploratory question.
 [NA]: Does not fit any Collaborative Code.
+
+Here are some examples:
+Conversation:
+Teacher: "What are the main causes of climate change?"
+Student 1: "Climate change is primarily caused by human activities like burning fossil fuels."
+Classification: Cognitive Code: [Complete]; Collaborative Code: [Answer].
+
+Conversation:
+Student 2: "I think deforestation also plays a big role in climate change."
+Classification: Cognitive Code: [Complete]; Collaborative Code: [Extend].
+
+Conversation:
+Student 3: "But isn't deforestation a natural process, not a human-made one?"
+Classification: Cognitive Code: [Incorrect]; Collaborative Code: [Question].
+
+Conversation:
+Student 4: "What do you mean by 'natural process' here? Could you clarify?"
+Classification: Cognitive Code: [Confusion]; Collaborative Code: [Question].
+
+Conversation:
+Student 5: "Global warming is caused by increasing temperatures."
+Classification: Cognitive Code: [Incomplete]; Collaborative Code: [New].
+
+Conversation:
+Student 6: "We already discussed this, but yes, I agree with what Student 1 said earlier."
+Classification: Cognitive Code: [NA]; Collaborative Code: [Agree].
+
+Your task:
+Using the definitions and examples above, categorize the latest student message appropriately.
+Follow the definitions strictly for each code. Choose the most appropriate category from both the "Cognitive Code" and the "Collaborative Code".
+The output should always be in the format: Cognitive Code: [CODE]; Collaborative Code: [CODE].
+For example: Cognitive Code: [Off-topic]; Collaborative Code: [Disagree].
