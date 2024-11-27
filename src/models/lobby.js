@@ -1,4 +1,5 @@
-const Chatbot = require('./chatbot/chatbot');
+const Rulesbot = require('./chatbot/rules_chatbot');
+const GPTbot = require('./chatbot/gpt_chatbot');
 const { generateGUID } = require("../../utils/guid.utils");
 const { shuffle } = require("../../utils/shuffle.utils");
 const { formatTimestamp } = require("../../utils/date.utils");
@@ -178,7 +179,7 @@ class Lobby {
     }
 
     // Initialize a chatbot object for each chatroom within the lobby
-    async initializeBots(lobby_guid, io, db) {
+    async initializeBots(lobby_guid, io, db, botType="gpt_based") {
         if (!this.chatSettings) {
             console.log('Chat settings not initialized.');
             return;
@@ -191,13 +192,25 @@ class Lobby {
                 console.log(usernames);
             }
 
-            const chatbotInstance = new Chatbot(
-                this.chatrooms[chat_guid], this.chatSettings.topic,
-                this.chatSettings.botName, this.chatSettings.assertiveness
-            );
+            const chatbotInstance =
+              botType === "gpt_based"
+                ? new GPTbot(
+                    this.chatrooms[chat_guid],
+                    this.chatSettings.topic,
+                    this.chatSettings.botName,
+                    this.chatSettings.assertiveness,
+                  )
+                : new Rulesbot(
+                    this.chatrooms[chat_guid],
+                    this.chatSettings.topic,
+                    this.chatSettings.botName,
+                    this.chatSettings.assertiveness,
+                  );
 
-            // Method initialize time tracker, can't be async
-            chatbotInstance.initializeTimeTracker(io, chat_guid);
+            if (botType==="rules_based"){
+              // Method initialize time tracker, can't be async
+              chatbotInstance.initializeTimeTracker(io, chat_guid);
+            }
 
             // Signal for users to jump to chatroom page
             io.to(chat_guid).emit('chatStarted', lobby_guid, chat_guid);
