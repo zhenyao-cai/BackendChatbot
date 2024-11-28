@@ -179,11 +179,15 @@ class Lobby {
     }
 
     // Initialize a chatbot object for each chatroom within the lobby
-    async initializeBots(lobby_guid, io, db, botType="gpt_based") {
+    async initializeBots(lobby_guid, io, db) {
         if (!this.chatSettings) {
             console.log('Chat settings not initialized.');
             return;
         }
+
+        console.log(`initBot.setting: ${this.chatSettings.botType}`)
+
+        const botType = this.chatSettings.botType ?? "gpt_based";
 
         for (let chat_guid in this.chatrooms) {
             console.log('Creating chatbot for room: ' + chat_guid);
@@ -193,7 +197,7 @@ class Lobby {
             }
 
             const chatbotInstance =
-              botType === "gpt_based"
+                botType === "gpt_based"
                 ? new GPTbot(
                     this.chatrooms[chat_guid],
                     this.chatSettings.topic,

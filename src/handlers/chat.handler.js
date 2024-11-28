@@ -13,6 +13,7 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
         assertiveness: chatData.assertiveness,
         topic: chatData.topic,
         chatName: chatData.chatName,
+        botType: chatData.botType,
       };
     } else {
       console.log("Error: Lobby not found.");
@@ -37,7 +38,7 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
 
     // Initialize one bot per chatrooms
     console.log("createChatrooms success, initializing bots...");
-    foundLobby.initializeBots(guid, io, db, "rules_based");
+    foundLobby.initializeBots(guid, io, db);
 
     // Begin timer
     foundLobby.startTimer(io, guid);
