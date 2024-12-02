@@ -72,14 +72,24 @@ class Lobby {
     }
 
     removeUser(username) {
-        if (this.users[username]) {
-            console.log("Removing user: " + username);
-            delete this.users[username];
-            // Additional logic for when a user leaves a lobby
+        const safeUsername = username ? username.trim() : "NAME";
+    
+        console.log("Attempting to remove user:", safeUsername);
+        
+        const userKeys = Object.keys(this.users);
+        
+        console.log("User exists:", userKeys.includes(safeUsername));
+    
+        if (safeUsername && userKeys.includes(safeUsername)) {
+            console.log("Removing user:", safeUsername);
+            delete this.users[safeUsername];
+            // Additional logic when a user leaves the lobby
             return true;
+        } else {
+            console.log("Remove User: User not found.");
+            return false;
         }
-        return false;
-    }
+    }    
 
     getUser(username) {
         if (this.users[username]){
