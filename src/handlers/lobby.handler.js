@@ -65,26 +65,34 @@ module.exports = function registerLobbyHandlers(socket, io, db, lobbyManager) {
         }
     });
 
-    // Not implemented on front-end
-    socket.on('leaveLobby', async (guid) => {
-        // const foundLobby = lobbyManager.getLobby(guid);
-        // disconnect processes
-        
-        console.log("leaveLobby");
-        console.log("guid", guid);
-            const foundLobby = lobbyManager.getLobby(guid);
-
-            if (foundLobby && (username in foundLobby.users)) {
-                foundLobby.removeUser(username);
+    socket.on('leaveLobby', async ({ guid, name }) => {
+        console.log("User attempting to leave lobby:");
+        console.log("guid:", guid);
+        console.log("socketId:", socket.id);
+        console.log("leaveLobby username:", name);
+    
+        const foundLobby = lobbyManager.getLobby(guid);
+        console.log("foundLobby:", foundLobby);
+    
+        if (foundLobby) {
+            const isRemoved = foundLobby.removeUser(name);
+    
+            if (isRemoved) {
+                console.log(`User with socketId ${socket.id} removed from lobby ${guid}`);
+                
+                io.to(guid).emit('userLeftLobby', socket.id);
+    
                 socket.leave(guid);
-                socket.emit('leftLobby', guid);
-                io.to(guid).emit('userLeftLobby', username);
-
-                if (Object.keys(foundLobby.users).length === 0) {
-                    console.log("lobby is removed1");
-                    const isSuccess = lobbyManager.removeLobby(guid); // Delete the lobby if empty
-                    // can add additional code for error check
+    
+                if (foundLobby.getUserCount() === 0) {
+                    console.log(`Lobby ${guid} is now empty and will be removed.`);
+                    lobbyManager.removeLobby(guid);
                 }
+            } else {
+                console.log(`User with socketId ${socket.id} not found in lobby ${guid}.`);
             }
-    });
+        } else {
+            console.log(`Lobby ${guid} not found.`);
+        }
+    });      
 };

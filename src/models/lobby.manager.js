@@ -76,14 +76,23 @@ class LobbyManager {
     }
 
     getLobby(guid) {
-        if (this.lobbies[guid]){
-            return this.lobbies[guid];
-        }
-        else {
+        console.log("this.lobbies guid:", guid);
+        console.log("this.lobbies:", this.lobbies);
+    
+        const trimmedGuid = guid ? guid.trim() : "GUID";
+        const normalizedGuid = trimmedGuid.toUpperCase(); 
+    
+        const lobbyKeys = Object.keys(this.lobbies);
+    
+        console.log("GUID matches:", lobbyKeys.includes(normalizedGuid));
+    
+        if (lobbyKeys.includes(normalizedGuid)) {
+            return this.lobbies[normalizedGuid];
+        } else {
             console.log("Get Lobby: Lobby not found.");
             return null;
         }
-    }
+    }    
     
     getLobbyByHostSocketId(socketId) {
         for (const guid in this.lobbies) {
