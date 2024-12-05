@@ -8,7 +8,6 @@ module.exports = function registerLobbyHandlers(socket, io, db, lobbyManager) {
         socket.emit('lobbyCreated', guid);
 
         const foundLobby = lobbyManager.getLobby(guid);
-        const chatSettings = foundLobby.getChatSettings();
         
         // Dynamic firebase access, set up new lobbby entry
         const lobbyRef = db.ref('lobbies').child(guid);
