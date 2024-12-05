@@ -45,7 +45,7 @@ function cognitiveRules(cognitive_code, collaborative_code, currentMessageId){
             countdownTimer = setTimeout(() => {
                 parentPort.postMessage({ messageId: currentMessageId, result: 'comprehension'});
             }, 3000);
-        }else if (collaborative_code === 'Incorrect'){
+        }else if (cognitive_code === 'Incorrect'){
             action = true;
 
             console.log("\n incorrect triggered"); 
