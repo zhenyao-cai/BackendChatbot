@@ -17,7 +17,7 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
         testMode: chatData.testMode,
         botType: chatData.botType,
       };
-      
+
     } else {
       console.log("Error: Lobby not found.");
     }
@@ -55,21 +55,22 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
     if (foundLobby) {
       const foundChatbot = foundLobby.getChatbot(chat_guid);
 
+      io.to(chat_guid).emit("message", messageData);
+      console.log(` > messageData to ${chat_guid}: ${messageData.text}`);
+
+      // Dynamic firebase access, record new message
+      const chatroomRef = db.ref(
+        `lobbies/${lobby_guid}/chatrooms/${chat_guid}/messages`,
+      );
+      let newMessageRef = chatroomRef.push();
+      newMessageRef.set({
+        timestamp: messageData.timestamp,
+        sender: messageData.sender,
+        text: messageData.text,
+      });
+      
       if (foundChatbot) {
         // Send message to chat
-        io.to(chat_guid).emit("message", messageData);
-        console.log(` > messageData to ${chat_guid}: ${messageData.text}`);
-
-        // Dynamic firebase access, record new message
-        const chatroomRef = db.ref(
-          `lobbies/${lobby_guid}/chatrooms/${chat_guid}/messages`,
-        );
-        let newMessageRef = chatroomRef.push();
-        newMessageRef.set({
-          timestamp: messageData.timestamp,
-          sender: messageData.sender,
-          text: messageData.text,
-        });
 
         const respond = await foundChatbot.botMessageListener(
           messageData.sender,
