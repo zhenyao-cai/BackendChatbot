@@ -53,7 +53,7 @@ function cognitiveRules(cognitive_code, collaborative_code, currentMessageId){
                 parentPort.postMessage({ messageId: currentMessageId, result: 'prompt'});
             }, 3000);
         }else if (cognitive_code === 'Confusion'){
-            action = true;
+            action = true
 
             console.log("\n confusion triggered");
             countdownTimer = setTimeout(() => {
@@ -70,9 +70,13 @@ function cognitiveRules(cognitive_code, collaborative_code, currentMessageId){
 function productivityRules(cognitive_code, collaborative_code, currentMessageId){
     let action = false;
 
+    
     try{
-        if (lastCategory &&  secLastCategory && cognitive_code === lastCategory.cognitive_code 
-            === secLastCategory.cognitive_code === "Off-topic"){
+        
+        if (lastCategory &&  secLastCategory && 
+            cognitive_code === lastCategory.cognitive_code && 
+            secLastCategory.cognitive_code === lastCategory.cognitive_code && 
+            secLastCategory.cognitive_code === "Off-topic"){
             action = true;
 
             console.log("\n off-topic triggered")

@@ -223,7 +223,7 @@ class Lobby {
             
 
             
-
+            console.log(botType);
             if (botType==="rules_based"){
               // Method initialize time tracker, can't be async, time tracker is for the inclusivity rule
               chatbotInstance.initializeTimeTracker(io, chat_guid);
