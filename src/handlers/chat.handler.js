@@ -13,6 +13,8 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
         assertiveness: chatData.assertiveness,
         topic: chatData.topic,
         chatName: chatData.chatName,
+        participantsPerRoom: chatData.participantsPerRoom,
+        testMode: chatData.testMode,
         botType: chatData.botType,
       };
     } else {

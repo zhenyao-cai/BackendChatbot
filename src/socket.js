@@ -33,11 +33,11 @@ module.exports = function initializeSocketIO(server, db) {
         registerChatHandlers(socket, io, db, lobbyManager);
 
         // FOR DEMO, NEEDS TO BE IMPLEMENTED: retrieving one classroom code, demo does not require users to enter classroom code.
-        socket.on('getLobbyCode', () => {
-            console.log("DEMO VERSION returning single classroom GUID");
-            const guid = lobbyManager.getFirstLobbyGUID();
-            socket.emit('getLobbyCodeResponse', guid);
-        });
+        // socket.on('getLobbyCode', async ({ code }) => {
+        //     console.log("DEMO VERSION returning single classroom GUID", code);
+        //     // const guid = lobbyManager.getFirstLobbyGUID();
+        //     socket.emit('getLobbyCodeResponse', code);
+        // });
 
         // Implement disconnect process to free wasted memory
         socket.on('disconnect', (reason) => {

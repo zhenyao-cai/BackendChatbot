@@ -73,14 +73,24 @@ class Lobby {
     }
 
     removeUser(username) {
-        if (this.users[username]) {
-            console.log("Removing user: " + username);
-            delete this.users[username];
-            // Additional logic for when a user leaves a lobby
+        const safeUsername = username ? username.trim() : "NAME";
+    
+        console.log("Attempting to remove user:", safeUsername);
+        
+        const userKeys = Object.keys(this.users);
+        
+        console.log("User exists:", userKeys.includes(safeUsername));
+    
+        if (safeUsername && userKeys.includes(safeUsername)) {
+            console.log("Removing user:", safeUsername);
+            delete this.users[safeUsername];
+            // Additional logic when a user leaves the lobby
             return true;
+        } else {
+            console.log("Remove User: User not found.");
+            return false;
         }
-        return false;
-    }
+    }    
 
     getUser(username) {
         if (this.users[username]){
@@ -134,13 +144,14 @@ class Lobby {
         }
 
         // Divide into correct number of chatrooms
-        let totalChatrooms = 0;
-        if (totalUsers < this.minChatroomSize){
-            totalChatrooms = 1;
-        } else {
-            totalChatrooms = Math.floor(totalUsers/this.minChatroomSize);
-        }
-
+        // let totalChatrooms = 0;
+        // if (totalUsers < this.minChatroomSize){
+        //     totalChatrooms = 1;
+        // } else {
+        //     totalChatrooms = Math.floor(totalUsers/this.minChatroomSize);
+        // }
+        const participantsPerRoom = this.getChatSettings().participantsPerRoom;
+        let totalChatrooms = Math.ceil(totalUsers / participantsPerRoom)
         // Initialize chatrooms with GUIDS
         let chatroomGuids = []; // Easy access to chatroom guids
         for (let i = 0; i < totalChatrooms; i++) {
@@ -189,9 +200,8 @@ class Lobby {
 
         const botType = this.chatSettings.botType ?? "gpt_based";
 
+        let cur_idx = 0;
         for (let chat_guid in this.chatrooms) {
-            console.log('Creating chatbot for room: ' + chat_guid);
-            console.log('Users:');
             for (let usernames of this.chatrooms[chat_guid]){
                 console.log(usernames);
             }
@@ -215,20 +225,56 @@ class Lobby {
               // Method initialize time tracker, can't be async
               chatbotInstance.initializeTimeTracker(io, chat_guid);
             }
+            const with_chatbot = !this.chatSettings.testMode || cur_idx < Object.keys(this.chatrooms).length / 2;
+            if (with_chatbot) {
+                console.log('Creating chatbot for room: ' + chat_guid);
+            } else {
+                console.log('creating room. No chatbot will be made for ' + chat_guid);
+            }
+            
+            if (with_chatbot) {
 
-            // Signal for users to jump to chatroom page
-            io.to(chat_guid).emit('chatStarted', lobby_guid, chat_guid);
+                // Method initialize time tracker, can't be async
+                chatbotInstance.initializeTimeTracker(io, chat_guid);
 
-            // Create the initial prompt to begin the chat
-            const isSuccess = await chatbotInstance.initializePrompting();
-            if (isSuccess) {
-                const botPrompt =
-                    chatbotInstance.getInitialQuestion();
-                console.log(` > InitialPrompt: ${botPrompt}`);
+                io.to(chat_guid).emit('chatStarted', lobby_guid, chat_guid);
 
+                const isSuccess = await chatbotInstance.initializePrompting();
+                if (isSuccess) {
+                    const botPrompt =
+                        chatbotInstance.getInitialQuestion();
+                    console.log(` > InitialPrompt: ${botPrompt}`);
+
+                    const messageData = {
+                        text: botPrompt,
+                        sender: chatbotInstance.getBotName(),
+                        timestamp: formatTimestamp(new Date().getTime())
+                    };
+
+                    // Send to frontend to display prompt in the chatroom
+                    io.to(chat_guid).emit('message', messageData);
+
+                    // Dynamic firebase access, set up new chatroom entry
+                    const chatroomRef = db.ref(
+                        `lobbies/${lobby_guid}/chatrooms/${chat_guid}/messages`
+                    );
+                    const newMessageRef = chatroomRef.push();
+                    newMessageRef.set(messageData);
+
+                    // Map chatbot object to chatroom code
+                    this.chatbots[chat_guid] = chatbotInstance;
+                } else {
+                    console.log("Error: Prompt failed to initialize.");
+                }
+            } else {
+                // Signal for users to jump to chatroom page
+                io.to(chat_guid).emit('chatStarted', lobby_guid, chat_guid);
+
+                const initialPrompt = `This chatroom will not have a chatbot facilitator. The  \
+                topic your group should discuss is ${this.chatSettings.topic}`;
                 const messageData = {
-                    text: botPrompt,
-                    sender: chatbotInstance.getBotName(),
+                    text: initialPrompt,
+                    sender: "Teacher",
                     timestamp: formatTimestamp(new Date().getTime())
                 };
 
@@ -242,11 +288,9 @@ class Lobby {
                 const newMessageRef = chatroomRef.push();
                 newMessageRef.set(messageData);
 
-                // Map chatbot object to chatroom code
-                this.chatbots[chat_guid] = chatbotInstance;
-            } else {
-                console.log("Error: Prompt failed to initialize.");
+                this.chatbots[chat_guid] = null;
             }
+            cur_idx += 1;
         }
     }
 }
