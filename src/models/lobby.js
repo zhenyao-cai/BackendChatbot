@@ -220,12 +220,16 @@ class Lobby {
                     this.chatSettings.botName,
                     this.chatSettings.assertiveness,
                   );
+            
+
+            
 
             if (botType==="rules_based"){
               // Method initialize time tracker, can't be async, time tracker is for the inclusivity rule
               chatbotInstance.initializeTimeTracker(io, chat_guid);
             }
             const with_chatbot = !this.chatSettings.testMode || cur_idx < Object.keys(this.chatrooms).length / 2;
+
             if (with_chatbot) {
                 console.log('Creating chatbot for room: ' + chat_guid);
             } else {
