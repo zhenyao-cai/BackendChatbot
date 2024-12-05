@@ -222,7 +222,7 @@ class Lobby {
                   );
 
             if (botType==="rules_based"){
-              // Method initialize time tracker, can't be async
+              // Method initialize time tracker, can't be async, time tracker is for the inclusivity rule
               chatbotInstance.initializeTimeTracker(io, chat_guid);
             }
             const with_chatbot = !this.chatSettings.testMode || cur_idx < Object.keys(this.chatrooms).length / 2;
@@ -233,9 +233,6 @@ class Lobby {
             }
             
             if (with_chatbot) {
-
-                // Method initialize time tracker, can't be async
-                chatbotInstance.initializeTimeTracker(io, chat_guid);
 
                 io.to(chat_guid).emit('chatStarted', lobby_guid, chat_guid);
 

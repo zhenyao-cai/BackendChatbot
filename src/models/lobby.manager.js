@@ -76,8 +76,8 @@ class LobbyManager {
     }
 
     getLobby(guid) {
-        console.log("this.lobbies guid:", guid);
-        console.log("this.lobbies:", this.lobbies);
+        // console.log("this.lobbies guid:", guid);
+        // console.log("this.lobbies:", this.lobbies);
     
         const trimmedGuid = guid ? guid.trim() : "GUID";
         const normalizedGuid = trimmedGuid.toUpperCase(); 

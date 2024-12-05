@@ -17,6 +17,14 @@ module.exports = function registerChatHandlers(socket, io, db, lobbyManager) {
         testMode: chatData.testMode,
         botType: chatData.botType,
       };
+
+      // update the bot details to database
+      const lobbyRef = db.ref('lobbies').child(guid);
+      lobbyRef.update({
+          test_mode: chatData.testMode,
+          bot_type: chatData.botType,
+      });
+
     } else {
       console.log("Error: Lobby not found.");
     }
