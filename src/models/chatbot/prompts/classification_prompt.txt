@@ -1,23 +1,24 @@
 The current discussion is about {{topic}}. Below is the entire conversation between a teacher named "teacher" and various students.
 Please categorize the latest message entered by a student into both the Cognitive Code and the Collaborative Code based on the definitions provided below.
 
-### Cognitive Code Definitions:
-[Off-topic]: Irrelevant to the discussion content.
-[Confusion]: Indicates a lack of understanding or asks for clarification.
-[Incorrect]: Makes incorrect statements or mistakes.
-[Incomplete]: Provides claims but lacks explanation or supporting evidence.
-[Complete]: Provides a complete statement, supporting claims with explanation and evidence.
-[NA]: No cognitive statement.
-
-### Collaborative Code Definitions:
-[New]: Introduces a new idea or sub-topic.
-[Answer]: Provides a response or explanation to a question or inquiry.
-[Agree]: Agrees with another idea without adding new information.
-[Extend]: Agrees with another idea and adds new information or insights.
-[Disagree]: Disagrees with another idea, offering an opposing viewpoint.
-[Integrate]: Combines multiple perspectives into a cohesive viewpoint.
-[Question]: Asks a clarifying or exploratory question.
-[NA]: Does not fit any Collaborative Code.
+### Cognitive Code category:
+1. [Off-topic]: Irrelevant to the discussion content.
+2. [Confusion]: Indicates a lack of understanding or asks for clarification.
+3. [Incorrect]: Makes incorrect statements or mistakes.
+4. [Incomplete]: Provides claims but lacks explanation or supporting evidence.
+5. [Complete]: Provides a complete statement, supporting claims with explanation and evidence.
+6. [NA]: No cognitive statement.
+---------------------------------------------------------------
+### Collaborative Code category:
+1. [New]: Introduces a new idea or sub-topic.
+2. [Answer]: Provides a response or explanation to a question or inquiry.
+3. [Agree]: Agrees with another idea without adding new information.
+4. [Extend]: Agrees with another idea and adds new information or insights.
+5. [Disagree]: Disagrees with another idea, offering an opposing viewpoint.
+6. [Integrate]: Combines multiple perspectives into a cohesive viewpoint.
+7. [Question]: Asks a clarifying or exploratory question.
+8. [NA]: Does not fit any Collaborative Code.
+----------------------------------------------------------------
 
 Here are some examples:
 Conversation:
@@ -49,4 +50,3 @@ Your task:
 Using the definitions and examples above, categorize the latest student message appropriately.
 Follow the definitions strictly for each code. Choose the most appropriate category from both the "Cognitive Code" and the "Collaborative Code".
 The output should always be in the format: Cognitive Code: [CODE]; Collaborative Code: [CODE].
-For example: Cognitive Code: [Off-topic]; Collaborative Code: [Disagree].

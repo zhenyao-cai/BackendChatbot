@@ -96,6 +96,9 @@ function checkInactiveParticipants() {
 function codeToScore(cognitive_code){
     let qualityScore = 0;
     switch (cognitive_code.toLowerCase()) {
+        case 'NA':
+            qualityScore = 0;
+            break;
         case 'off-topic':
             qualityScore = 0;
             break;

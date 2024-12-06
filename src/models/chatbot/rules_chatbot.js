@@ -201,7 +201,8 @@ class Chatbot {
             
             const classificationResponse = await openai.chat.completions.create({
                 messages: this.classificationMessages,
-                model: "gpt-3.5-turbo-1106"
+                model: "gpt-3.5-turbo-1106",
+                temperature: 0.5
             });
 
             const classificationResult = classificationResponse.choices[0].message.content.trim();

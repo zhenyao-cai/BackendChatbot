@@ -206,7 +206,17 @@ class Lobby {
                 console.log(usernames);
             }
 
-            const chatbotInstance =
+            const with_chatbot = !this.chatSettings.testMode || cur_idx < Object.keys(this.chatrooms).length / 2;
+
+            if (with_chatbot) {
+                console.log('Creating chatbot for room: ' + chat_guid);
+            } else {
+                console.log('creating room. No chatbot will be made for ' + chat_guid);
+            }
+            
+            if (with_chatbot) {
+
+                const chatbotInstance =
                 botType === "gpt_based"
                 ? new GPTbot(
                     this.chatrooms[chat_guid],
@@ -220,23 +230,11 @@ class Lobby {
                     this.chatSettings.botName,
                     this.chatSettings.assertiveness,
                   );
-            
 
-            
-            console.log(botType);
-            if (botType==="rules_based"){
-              // Method initialize time tracker, can't be async, time tracker is for the inclusivity rule
-              chatbotInstance.initializeTimeTracker(io, chat_guid);
-            }
-            const with_chatbot = !this.chatSettings.testMode || cur_idx < Object.keys(this.chatrooms).length / 2;
-
-            if (with_chatbot) {
-                console.log('Creating chatbot for room: ' + chat_guid);
-            } else {
-                console.log('creating room. No chatbot will be made for ' + chat_guid);
-            }
-            
-            if (with_chatbot) {
+                if (botType ==="rules_based"){
+                // Method initialize time tracker, can't be async, time tracker is for the inclusivity rule
+                chatbotInstance.initializeTimeTracker(io, chat_guid);
+                }
 
                 io.to(chat_guid).emit('chatStarted', lobby_guid, chat_guid);
 
